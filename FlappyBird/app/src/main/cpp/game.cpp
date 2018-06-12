@@ -7,6 +7,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <thread>
+
 #include "game.h"
 
 Game* Game::m_game = nullptr;
@@ -31,16 +33,21 @@ static const char* vertex_shader_text =
 "#version 100\n"
 "uniform mat4 MVP;\n"
 "attribute vec3 position;\n"
-"//attribute vec2 uv;\n"
+"attribute vec3 uv;\n"
+"varying vec2 o_uv;\n"
 "void main() {\n"
 "  gl_Position = MVP * vec4(position, 1.0);\n"
+"  o_uv = vec2(uv.x, uv.y);\n"
 "}\n";
 
 static const char* fragment_shader_text =
 "#version 100\n"
 "uniform vec3 color;\n"
+"varying vec2 o_uv;\n"
+"uniform sampler2D tex;\n"
 "void main() {\n"
-"  gl_FragColor = vec4(color, 1.0);\n"
+"  gl_FragColor = vec4(color.x, color.y, color.z, 1.0);\n"
+"  gl_FragColor = texture2D(tex, o_uv);\n"
 "}\n";
 
 bool CheckGLError(const char* tag = "") {
@@ -94,6 +101,11 @@ void Game::setupOpenGL() {
     m_vertices[2] = {  1.0f,  1.0f, 0.0f };
     m_vertices[3] = {  1.0f, -1.0f, 0.0f };
 
+    m_uvs[0] = { 0.0f, 1.0f, 0.0f };
+    m_uvs[1] = { 0.0f, 0.0f, 0.0f };
+    m_uvs[2] = { 1.0f, 1.0f, 0.0f };
+    m_uvs[3] = { 1.0f, 0.0f, 0.0f };
+
     m_indices[0] = 0;
     m_indices[1] = 1;
     m_indices[2] = 2;
@@ -105,20 +117,12 @@ void Game::setupOpenGL() {
     CheckGLError("glGenBuffers");
     glBindBuffer(GL_ARRAY_BUFFER, m_vertices_index);
     CheckGLError("glBindBuffer");
-    glBufferData(GL_ARRAY_BUFFER, sizeof(m_vertices) + sizeof(m_indices), m_vertices, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, sizeof(m_vertices), sizeof(m_indices), m_indices);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(m_vertices) + sizeof(m_uvs) + sizeof(m_indices), m_vertices, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(m_vertices), sizeof(m_uvs), m_uvs);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(m_vertices) + sizeof(m_uvs), sizeof(m_indices), m_indices);
     CheckGLError("glBufferData");
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     CheckGLError("glBindBuffer(0)");
-
-//    glGenBuffers(1, &m_indices_index);
-//    CheckGLError("glGenBuffers indices");
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indices_index);
-//    CheckGLError("glBindBuffer indices");
-//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(m_indices), m_indices, GL_STATIC_DRAW);
-//    CheckGLError("glBufferData indices");
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-//    CheckGLError("glBindBuffer(0) indices");
 
 
     GLuint  other_vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
@@ -180,11 +184,20 @@ void Game::setupOpenGL() {
 
     m_position_location = glGetAttribLocation(program_id, "position");
     glEnableVertexAttribArray(m_position_location);
-    CheckGLError("glEnableVertexAttribArray");
+    CheckGLError("glEnableVertexAttribArray position");
+
+    m_uvs_location = glGetAttribLocation(program_id, "uv");
+    glEnableVertexAttribArray(m_uvs_location);
+    CheckGLError("glEnableVertexAttribArray uvs");
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertices_index);
+    glVertexAttribPointer(m_uvs_location, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)sizeof(m_vertices));
+    CheckGLError("glVertexAttribPointer uvs");
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
     // Projection matrix
-    //   column-major order
+    //   column-major order!
 
     float right  =  1.0f;
     float left   = -1.0f;
@@ -224,6 +237,12 @@ void Game::setupOpenGL() {
 }
 
 void Game::onSurfaceCreated() {
+    srand(std::chrono::duration_cast<std::chrono::duration<int32_t > >(m_clock.now().time_since_epoch()).count());
+
+    m_time1 = m_clock.now();
+    m_time2 = m_clock.now();
+    m_prev_time = std::chrono::duration_cast<std::chrono::duration<float> >(m_time2 - m_time1).count();
+
     setupOpenGL();
 
     m_sprites.emplace_back(Sprite());
@@ -234,37 +253,60 @@ void Game::onSurfaceChanged(int width, int height) {
 }
 
 void Game::onDrawFrame() {
+    m_time1 = m_clock.now();
+
+    //__android_log_print(ANDROID_LOG_INFO, "LOG", "frame_time: %.2f\n", m_prev_time);
     for (uint32_t i = 0; i < m_sprites.size(); ++i) {
-        m_sprites[i].update(16.6f);
+        m_sprites[i].update(m_prev_time);
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    Sprite* sprite = nullptr;
     for (uint32_t i = 0; i < m_sprites.size(); ++i) {
-        Color c = m_sprites[i].getColor();
-        glUniform3f(m_color_location, (float)(c.r / 255), (float)(c.g / 255), (float)(c.b / 255));
+        sprite = &m_sprites[i];
+
+        Color c = sprite->getColor();
+        glUniform3f(m_color_location, (float)c.r / (float)255, (float)c.g / (float)255, (float)c.b / (float)255);
         CheckGLError(std::string(std::string("glUniform3f") + std::to_string(i)).c_str());
+
+        glBindTexture(GL_TEXTURE_2D, sprite->getTextureHandler());
 
         glBindBuffer(GL_ARRAY_BUFFER, m_vertices_index);
         CheckGLError(std::string(std::string("glBindBuffer") + std::to_string(i)).c_str());
-        Vec3 pos = m_sprites[i].getPosition();
+
+        Vec3 scale = sprite->getScale();
+
+        Vec3 pos = sprite->getPosition();
         Vec3 vertices[4] = {
-                { m_vertices[0].x + pos.x, m_vertices[0].y + pos.y, m_vertices[0].z + pos.z },
-                { m_vertices[1].x + pos.x, m_vertices[1].y + pos.y, m_vertices[1].z + pos.z },
-                { m_vertices[2].x + pos.x, m_vertices[2].y + pos.y, m_vertices[2].z + pos.z },
-                { m_vertices[3].x + pos.x, m_vertices[3].y + pos.y, m_vertices[3].z + pos.z },
+                { m_vertices[0].x * scale.x + pos.x, m_vertices[0].y * scale.y + pos.y, m_vertices[0].z * scale.z + pos.z },
+                { m_vertices[1].x * scale.x + pos.x, m_vertices[1].y * scale.y + pos.y, m_vertices[1].z * scale.z + pos.z },
+                { m_vertices[2].x * scale.x + pos.x, m_vertices[2].y * scale.y + pos.y, m_vertices[2].z * scale.z + pos.z },
+                { m_vertices[3].x * scale.x + pos.x, m_vertices[3].y * scale.y + pos.y, m_vertices[3].z * scale.z + pos.z },
         };
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), &vertices);
         CheckGLError(std::string(std::string("glBufferSubData") + std::to_string(i)).c_str());
         glVertexAttribPointer(m_position_location, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-        CheckGLError(std::string(std::string("glVertexAttribPointer") + std::to_string(i)).c_str());
+        CheckGLError(std::string(std::string("glVertexAttribPointer position") + std::to_string(i)).c_str());
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indices_index);
         CheckGLError("glBindBuffer GL_ELEMENT_ARRAY_BUFFER");
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, m_indices);
         //glDrawArrays(GL_TRIANGLES, 0, 6);
         CheckGLError(std::string(std::string("glDrawElements") + std::to_string(i)).c_str());
+
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    // Lock framerate to 60 fps for fast machines
+    // Using a spinlock because std::sleep can be imprecise
+    m_time2 = m_clock.now();
+    m_prev_time = std::chrono::duration_cast<std::chrono::duration<float> >(m_time2 - m_time1).count();
+    m_time1 = m_clock.now();
+    while (m_prev_time < 16.6666f) {
+        m_time2 = m_clock.now();
+        m_prev_time += std::chrono::duration_cast<std::chrono::duration<float> >(m_time2 - m_time1).count();
     }
 }

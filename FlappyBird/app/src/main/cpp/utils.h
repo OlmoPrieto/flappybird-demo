@@ -6,6 +6,8 @@
 #define FLAPPYBIRD_UTILS_H
 
 #include <cstring>
+#include <cstdint>
+#include <cstdlib>
 
 struct Mat4 {
     float matrix[16];
@@ -81,7 +83,7 @@ struct Color {
     uint8_t b;
     uint8_t a;
 
-    Color() : r(0), g(0), b(0), a(0) {
+    Color() : r((uint8_t)0), g((uint8_t)0), b((uint8_t)0), a((uint8_t)0) {
 
     }
 
@@ -92,6 +94,50 @@ struct Color {
     void set(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a) {
         r = _r; g = _g; b = _b; a = _a;
     }
+
+    void setRandom() {
+        r = rand() % 255;
+        g = rand() % 255;
+        b = rand() % 255;
+
+        a = 255; // ??
+    }
 };
+
+// TODO: static void SetTextureColor();
+
+static void CreateCircleInTexture(uint8_t* texture, uint32_t width, uint32_t height, const Color& c) {
+//    uint32_t color = ((c.r << 24) & 0xFF000000) |
+//            ((c.g << 24) & 0x00FF0000) |
+//            ((c.b << 24) & 0x0000FF00) |
+//            ((c.a << 24) & 0x000000FF);
+
+    memset(texture, 0, width * height * 4);
+
+    uint32_t radius = width * 0.5f;
+    uint32_t powered_radius = radius * radius;
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint8_t* ptr = texture;
+    for (uint32_t i = 0; i < width * height * 4; i += 4) {
+        x = (uint32_t)(i * 0.25f) / width;
+        y = (uint32_t)(i * 0.25f) % width;
+
+        if ((x - radius) * (x - radius) && (y - radius) * (y - radius) < powered_radius) {
+            *(ptr + 0) = c.r;
+            *(ptr + 1) = c.g;
+            *(ptr + 2) = c.b;
+            *(ptr + 3) = c.a;
+        }
+        else {
+            *(ptr + 0) = 255;
+            *(ptr + 1) = 255;
+            *(ptr + 2) = 255;
+            *(ptr + 3) = 255;
+        }
+
+        ptr += 4;
+    }
+}
 
 #endif //FLAPPYBIRD_UTILS_H

@@ -6,6 +6,8 @@
 #define FLAPPYBIRD_GAME_H
 
 #include <GLES2/gl2.h>
+
+#include <chrono>
 #include <vector>
 
 #include "sprite.h"
@@ -16,17 +18,25 @@ private:
     Game();
     void setupOpenGL();
 
+    std::vector<Sprite> m_sprites;
+    std::chrono::high_resolution_clock m_clock;
+    std::chrono::high_resolution_clock::time_point m_time1;
+    std::chrono::high_resolution_clock::time_point m_time2;
+
+    Vec3 m_vertices[4];
+    Vec3 m_uvs[4];
+
+    Mat4 m_projection;
+
     GLuint m_vertices_index = 0;
     GLuint m_indices_index = 0;
     GLint m_mvp_location = -1;
     GLint m_color_location = -1;
     GLint m_position_location = -1;
+    GLint m_uvs_location = -1;
     GLuint m_indices[6];
-    Vec3 m_vertices[4];
 
-    Mat4 m_projection;
-
-    std::vector<Sprite> m_sprites;
+    float m_prev_time = 0.0f;
 
     static Game* m_game;
 

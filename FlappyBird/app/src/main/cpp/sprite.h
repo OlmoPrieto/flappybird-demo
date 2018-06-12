@@ -11,7 +11,14 @@
 class Sprite {
 private:
     Vec3 m_position;
+    Vec3 m_scale;
     Color m_color;
+
+    GLuint m_texture_id = 0;
+
+    uint32_t m_texture_width = 0;
+    uint32_t m_texture_height = 0;
+    uint8_t* m_texture = nullptr;
 
 public:
 
@@ -19,7 +26,10 @@ public:
     ~Sprite();
 
     Color getColor() const;
-    Vec3 getPosition();
+    Vec3 getPosition() const;
+    Vec3 getScale() const;
+
+    uint32_t getTextureHandler() const;
 
     void update(float dt);
 };
