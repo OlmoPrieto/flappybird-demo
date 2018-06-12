@@ -12,7 +12,7 @@ class Sprite {
 private:
     Vec3 m_position;
     Vec3 m_scale;
-    Color m_color;
+    Color m_color;  // m_color is now used as tint in the shader
 
     GLuint m_texture_id = 0;
 

@@ -46,8 +46,9 @@ static const char* fragment_shader_text =
 "varying vec2 o_uv;\n"
 "uniform sampler2D tex;\n"
 "void main() {\n"
-"  gl_FragColor = vec4(color.x, color.y, color.z, 1.0);\n"
-"  gl_FragColor = texture2D(tex, o_uv);\n"
+//"  gl_FragColor = vec4(color.x, color.y, color.z, 1.0);\n"
+"  gl_FragColor = texture2D(tex, o_uv) * vec4(color, 1.0);\n"
+//"  gl_FragColor = vec4(o_uv.x, o_uv.y, 0.0, 1.0);\n"
 "}\n";
 
 bool CheckGLError(const char* tag = "") {

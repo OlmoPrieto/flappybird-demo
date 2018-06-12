@@ -83,7 +83,7 @@ struct Color {
     uint8_t b;
     uint8_t a;
 
-    Color() : r((uint8_t)0), g((uint8_t)0), b((uint8_t)0), a((uint8_t)0) {
+    Color() : r((uint8_t)255), g((uint8_t)255), b((uint8_t)255), a((uint8_t)255) {
 
     }
 
@@ -96,16 +96,34 @@ struct Color {
     }
 
     void setRandom() {
-        r = rand() % 255;
-        g = rand() % 255;
-        b = rand() % 255;
+        r = (uint8_t)(rand() % 255);
+        g = (uint8_t)(rand() % 255);
+        b = (uint8_t)(rand() % 255);
 
         a = 255; // ??
     }
 };
 
-// TODO: static void SetTextureColor();
+static void SetTextureColor(uint8_t* texture, uint32_t width, uint32_t height, const Color& c) {
+//        uint32_t color = ((c.r << 24) & 0xFF000000) |
+//                ((c.g << 24) & 0x00FF0000) |
+//                ((c.b << 24) & 0x0000FF00) |
+//                ((c.a << 24) & 0x000000FF);
+//        //uint32_t color = (c.r << 24) | (c.g << 16) | (c.b << 8) | c.a;
+//        memset(texture, color, width * height * 4);
 
+    uint8_t* ptr = texture;
+    for (uint32_t i = 0; i < width * height * 4; i += 4) {
+        *(ptr + 0) = c.r;
+        *(ptr + 1) = c.g;
+        *(ptr + 2) = c.b;
+        *(ptr + 3) = c.a;
+
+        ptr += 4;
+    }
+}
+
+// TODO: now it creates an oval. FIX
 static void CreateCircleInTexture(uint8_t* texture, uint32_t width, uint32_t height, const Color& c) {
 //    uint32_t color = ((c.r << 24) & 0xFF000000) |
 //            ((c.g << 24) & 0x00FF0000) |
@@ -114,7 +132,7 @@ static void CreateCircleInTexture(uint8_t* texture, uint32_t width, uint32_t hei
 
     memset(texture, 0, width * height * 4);
 
-    uint32_t radius = width * 0.5f;
+    uint32_t radius = (uint32_t)((float)width * 0.5f);
     uint32_t powered_radius = radius * radius;
     uint32_t x = 0;
     uint32_t y = 0;
@@ -123,17 +141,17 @@ static void CreateCircleInTexture(uint8_t* texture, uint32_t width, uint32_t hei
         x = (uint32_t)(i * 0.25f) / width;
         y = (uint32_t)(i * 0.25f) % width;
 
-        if ((x - radius) * (x - radius) && (y - radius) * (y - radius) < powered_radius) {
+        if ((x - radius) * (x - radius) + (y - radius) * (y - radius) < powered_radius) {
             *(ptr + 0) = c.r;
             *(ptr + 1) = c.g;
             *(ptr + 2) = c.b;
             *(ptr + 3) = c.a;
         }
         else {
-            *(ptr + 0) = 255;
-            *(ptr + 1) = 255;
-            *(ptr + 2) = 255;
-            *(ptr + 3) = 255;
+            *(ptr + 0) = 0;
+            *(ptr + 1) = 0;
+            *(ptr + 2) = 0;
+            *(ptr + 3) = 0;
         }
 
         ptr += 4;

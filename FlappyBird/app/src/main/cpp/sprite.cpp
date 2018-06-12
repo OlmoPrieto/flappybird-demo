@@ -2,6 +2,8 @@
 // Created by Olmo on 10/06/2018.
 //
 
+#include <android/log.h>
+
 #include "sprite.h"
 
 Sprite::Sprite() {
@@ -9,16 +11,20 @@ Sprite::Sprite() {
     m_scale.y = 1.0f;
     m_scale.z = 1.0f;
 
-    //m_color = Color((uint8_t)255, (uint8_t)0, (uint8_t)0, (uint8_t)255);
-    m_color.setRandom();
+    //m_color.setRandom();
 
     m_texture_width = 1024;
     m_texture_height = 1024;
     m_texture = (uint8_t*)malloc(m_texture_width * m_texture_height * 4);
-    CreateCircleInTexture(m_texture, m_texture_width, m_texture_height, Color(255, 0, 0, 255));
+    //CreateCircleInTexture(m_texture, m_texture_width, m_texture_height, Color(255, 0, 0, 255));
+    SetTextureColor(m_texture, m_texture_width, m_texture_height, Color(0, 255, 0, 255));
 
     glGenTextures(1, &m_texture_id);
     glBindTexture(GL_TEXTURE_2D, m_texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_texture_width, m_texture_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_texture);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -46,5 +52,5 @@ uint32_t Sprite::getTextureHandler() const {
 }
 
 void Sprite::update(float dt) {
-    m_position.x += 0.001f * dt;
+    //m_position.x += 0.001f * dt;
 }
