@@ -102,6 +102,18 @@ struct Color {
 
         a = 255; // ??
     }
+
+    static Color randomColor() {
+        Color c;
+
+        c.r = (uint8_t)(rand() % 255);
+        c.g = (uint8_t)(rand() % 255);
+        c.b = (uint8_t)(rand() % 255);
+
+        c.a = 255; // ??
+
+        return c;
+    }
 };
 
 static void SetTextureColor(uint8_t* texture, uint32_t width, uint32_t height, const Color& c) {

@@ -244,13 +244,60 @@ void Game::onSurfaceCreated() {
     m_time2 = m_clock.now();
     m_prev_time = std::chrono::duration_cast<std::chrono::duration<float> >(m_time2 - m_time1).count();
 
+    // ALWAYS FIRST
     setupOpenGL();
 
-    m_sprites.emplace_back(Sprite());
+    m_sprites.emplace_back();
+
+    Vec3 pos(1.5f, 0.0f, 0.0f);
+    for (uint32_t i = 0; i < m_max_obstacles; ++i) {
+        //Obstacle obs;
+        //obs.setPosition(pos.x * i, pos.y, pos.z);
+        //m_obstacles.push_back(obs);
+        // TODO: commented because it was causing problems with the destructor, when fixed, uncomment ??
+        m_obstacles.emplace_back();
+    }
+    for (uint32_t i = 0; i < m_max_obstacles; ++i) {
+        m_obstacles[i].setPosition(pos.x * (i + 1), pos.y, pos.z);
+    }
 }
 
 void Game::onSurfaceChanged(int width, int height) {
     // Do nothing
+}
+
+void Game::drawSprite(Sprite* sprite) {
+    Color c = sprite->getColor();
+    glUniform3f(m_color_location, (float)c.r / (float)255, (float)c.g / (float)255, (float)c.b / (float)255);
+    CheckGLError("glUniform3f");
+
+    glBindTexture(GL_TEXTURE_2D, sprite->getTextureHandler());
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertices_index);
+    CheckGLError("glBindBuffer");
+
+    Vec3 scale = sprite->getScale();
+    Vec3 pos = sprite->getPosition();
+    Vec3 vertices[4] = {
+            { m_vertices[0].x * scale.x + pos.x, m_vertices[0].y * scale.y + pos.y, m_vertices[0].z * scale.z + pos.z },
+            { m_vertices[1].x * scale.x + pos.x, m_vertices[1].y * scale.y + pos.y, m_vertices[1].z * scale.z + pos.z },
+            { m_vertices[2].x * scale.x + pos.x, m_vertices[2].y * scale.y + pos.y, m_vertices[2].z * scale.z + pos.z },
+            { m_vertices[3].x * scale.x + pos.x, m_vertices[3].y * scale.y + pos.y, m_vertices[3].z * scale.z + pos.z },
+    };
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), &vertices);
+    CheckGLError("glBufferSubData");
+    glVertexAttribPointer(m_position_location, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+    CheckGLError("glVertexAttribPointer position");
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indices_index);
+    CheckGLError("glBindBuffer GL_ELEMENT_ARRAY_BUFFER");
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, m_indices);
+    //glDrawArrays(GL_TRIANGLES, 0, 6);
+    CheckGLError("glDrawElements");
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Game::onDrawFrame() {
@@ -259,46 +306,25 @@ void Game::onDrawFrame() {
     //__android_log_print(ANDROID_LOG_INFO, "LOG", "frame_time: %.2f\n", m_prev_time);
     for (uint32_t i = 0; i < m_sprites.size(); ++i) {
         m_sprites[i].update(m_prev_time);
+        //drawSprite(&m_sprites[i]);
+    }
+
+    for (uint32_t i = 0; i < m_obstacles.size(); ++i) {
+        m_obstacles[i].update(m_prev_time);
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    Sprite* sprite = nullptr;
-    for (uint32_t i = 0; i < m_sprites.size(); ++i) {
-        sprite = &m_sprites[i];
+    Obstacle* obstacle = nullptr;
+    Sprite* upper = nullptr;
+    Sprite* lower = nullptr;
+    for (uint32_t i = 0; i < m_obstacles.size(); ++i) {
+        obstacle = &m_obstacles[i];
+        upper = obstacle->getUpperSprite();
+        lower = obstacle->getLowerSprite();
 
-        Color c = sprite->getColor();
-        glUniform3f(m_color_location, (float)c.r / (float)255, (float)c.g / (float)255, (float)c.b / (float)255);
-        CheckGLError(std::string(std::string("glUniform3f") + std::to_string(i)).c_str());
-
-        glBindTexture(GL_TEXTURE_2D, sprite->getTextureHandler());
-
-        glBindBuffer(GL_ARRAY_BUFFER, m_vertices_index);
-        CheckGLError(std::string(std::string("glBindBuffer") + std::to_string(i)).c_str());
-
-        Vec3 scale = sprite->getScale();
-
-        Vec3 pos = sprite->getPosition();
-        Vec3 vertices[4] = {
-                { m_vertices[0].x * scale.x + pos.x, m_vertices[0].y * scale.y + pos.y, m_vertices[0].z * scale.z + pos.z },
-                { m_vertices[1].x * scale.x + pos.x, m_vertices[1].y * scale.y + pos.y, m_vertices[1].z * scale.z + pos.z },
-                { m_vertices[2].x * scale.x + pos.x, m_vertices[2].y * scale.y + pos.y, m_vertices[2].z * scale.z + pos.z },
-                { m_vertices[3].x * scale.x + pos.x, m_vertices[3].y * scale.y + pos.y, m_vertices[3].z * scale.z + pos.z },
-        };
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), &vertices);
-        CheckGLError(std::string(std::string("glBufferSubData") + std::to_string(i)).c_str());
-        glVertexAttribPointer(m_position_location, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-        CheckGLError(std::string(std::string("glVertexAttribPointer position") + std::to_string(i)).c_str());
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indices_index);
-        CheckGLError("glBindBuffer GL_ELEMENT_ARRAY_BUFFER");
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, m_indices);
-        //glDrawArrays(GL_TRIANGLES, 0, 6);
-        CheckGLError(std::string(std::string("glDrawElements") + std::to_string(i)).c_str());
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        drawSprite(upper);
+        drawSprite(lower);
     }
 
     // Lock framerate to 60 fps for fast machines

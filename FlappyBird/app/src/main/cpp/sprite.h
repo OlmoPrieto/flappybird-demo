@@ -9,7 +9,7 @@
 #include "utils.h"
 
 class Sprite {
-private:
+protected:
     Vec3 m_position;
     Vec3 m_scale;
     Color m_color;  // m_color is now used as tint in the shader
@@ -29,7 +29,23 @@ public:
     Vec3 getPosition() const;
     Vec3 getScale() const;
 
+    void setPosition(const Vec3& position);
+    void setPosition(float x, float y, float z);
+    void setPositionX(float x);
+    void setPositionY(float y);
+    void setPositionZ(float z);
+    void setScale(const Vec3& scale);
+    void setScale(float x, float y, float z);
+    void setScaleX(float x);
+    void setScaleY(float y);
+    void setScaleZ(float z);
+
+    void setTextureData(uint8_t** data);
+
     uint32_t getTextureHandler() const;
+    uint8_t** getTextureData();
+    uint32_t getTextureWidth() const;
+    uint32_t getTextureHeight() const;
 
     void update(float dt);
 };
