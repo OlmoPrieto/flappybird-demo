@@ -14,7 +14,7 @@
 Game* Game::m_game = nullptr;
 
 Game::Game() {
-
+    m_obstacle_index = m_max_obstacles - 1;
 }
 
 Game::~Game() {
@@ -249,14 +249,13 @@ void Game::onSurfaceCreated() {
 
     Vec3 pos(1.5f, 0.0f, 0.0f);
     for (uint32_t i = 0; i < m_max_obstacles; ++i) {
-        //Obstacle obs;
-        //obs.setPosition(pos.x * i, pos.y, pos.z);
-        //m_obstacles.push_back(obs);
-        // TODO: commented because it was causing problems with the destructor, when fixed, uncomment ??
         m_obstacles.emplace_back();
+        m_obstacles[i].setPosition(pos.x * (i + 1), pos.y, pos.z);
+        //m_obstacles[i].moveSpritesBy(m_obstacles[i].getPosition());
+        m_obstacles[i].setSpritesPositions();
     }
     for (uint32_t i = 0; i < m_max_obstacles; ++i) {
-        m_obstacles[i].setPosition(pos.x * (i + 1), pos.y, pos.z);
+        //m_obstacles[i].setPosition(pos.x * (i + 1), pos.y, pos.z);
     }
 }
 
@@ -318,8 +317,18 @@ void Game::onDrawFrame() {
 
     m_player.update(m_prev_time);
 
-    for (uint32_t i = 0; i < m_obstacles.size(); ++i) {
+    for (uint32_t i = 0; i < m_max_obstacles; ++i) {
         m_obstacles[i].update(m_prev_time);
+
+        Vec3 pos = m_obstacles[i].getPosition();
+        if (pos.x < -1.5f) {
+            __android_log_print(ANDROID_LOG_INFO, "LOG", "%u\n", m_obstacle_index % m_max_obstacles);
+            // set that obstacle behind the last one
+            pos.x = m_obstacles[m_obstacle_index++ % m_max_obstacles].getPosition().x + 1.5f;
+
+            m_obstacles[i].setPosition(pos);
+            m_obstacles[i].setSpritesPositions(Vec3(pos.x, 0.0f, 0.0f));
+        }
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -331,7 +340,7 @@ void Game::onDrawFrame() {
     Obstacle* obstacle = nullptr;
     Sprite* upper = nullptr;
     Sprite* lower = nullptr;
-    for (uint32_t i = 0; i < m_obstacles.size(); ++i) {
+    for (uint32_t i = 0; i < m_max_obstacles; ++i) {
         obstacle = &m_obstacles[i];
         upper = obstacle->getUpperSprite();
         lower = obstacle->getLowerSprite();

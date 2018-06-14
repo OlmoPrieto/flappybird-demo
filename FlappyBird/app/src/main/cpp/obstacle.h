@@ -9,8 +9,6 @@
 
 class Obstacle {
 private:
-    void setSpritesPositions();
-
     Sprite m_upper;
     Sprite m_lower;
 
@@ -41,6 +39,10 @@ public:
     void setPosition(float x, float y, float z);
 
     uint32_t getID() const;
+
+    void setSpritesPositions();
+    void setSpritesPositions(const Vec3& pos);
+    void moveSpritesBy(const Vec3& offset);
 
     void update(float dt);
 };

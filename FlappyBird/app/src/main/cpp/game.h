@@ -59,6 +59,8 @@ private:
 
     uint32_t m_max_obstacles = 7;
 
+    uint32_t m_obstacle_index = 0;
+
     float m_prev_time = 0.0f;
 
     static Game* m_game;

@@ -78,10 +78,22 @@ void Obstacle::setSpritesPositions() {
     m_lower.setPosition(m_position.x + pos.x, m_position.y + pos.y, m_position.z + pos.z);
 }
 
+void Obstacle::setSpritesPositions(const Vec3& pos) {
+    m_upper.setPosition(pos);
+    m_lower.setPosition(pos);
+}
+
+void Obstacle::moveSpritesBy(const Vec3& offset) {
+    Vec3 pos = m_upper.getPosition();
+    m_upper.setPosition(offset.x + pos.x, offset.y + pos.y, offset.z + pos.z);
+    pos = m_lower.getPosition();
+    m_lower.setPosition(offset.x + pos.x, offset.y + pos.y, offset.z + pos.z);
+}
+
 void Obstacle::setPosition(const Vec3 &position) {
     m_position = position;
 
-    setSpritesPositions();
+    //setSpritesPositions();
 }
 
 void Obstacle::setPosition(float x, float y, float z) {
@@ -89,7 +101,7 @@ void Obstacle::setPosition(float x, float y, float z) {
     m_position.y = y;
     m_position.z = z;
 
-    setSpritesPositions();
+    //setSpritesPositions();
 }
 
 uint32_t Obstacle::getID() const {
