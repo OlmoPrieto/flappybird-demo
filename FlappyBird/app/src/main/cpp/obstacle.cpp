@@ -6,7 +6,7 @@
 
 #include "obstacle.h"
 
-float Obstacle::m_speed = 0.00075f;
+float Obstacle::m_speed = 0.001f;
 float Obstacle::m_gap   = 0.15f;
 uint32_t Obstacle::m_global_id = 0;
 

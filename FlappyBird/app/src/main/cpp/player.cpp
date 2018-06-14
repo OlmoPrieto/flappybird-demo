@@ -24,18 +24,19 @@ Sprite* Player::getSprite() {
 }
 
 void Player::addForce() {
-    //m_y_force += m_impulse_amount;
+    m_y_velocity = m_impulse_amount;
     __android_log_print(ANDROID_LOG_INFO, "LOG", "TOUCH!\n");
 }
 
 void Player::update(float dt) {
-    float gravity = 1.0f;
+    Vec3 pos = m_sprite.getPosition();
+    float gravity = 0.0f;//-0.000001f;
+    float speed = -0.000075f;//1.0f;
     float acceleration = m_y_force + gravity;
 
-    m_y_velocity += m_y_force + acceleration * dt;
+    m_y_velocity += speed + acceleration * dt;
 
-    Vec3 pos = m_sprite.getPosition();
-    pos.y += m_y_velocity * dt + 0.5f * acceleration * (dt*dt);
+    pos.y += m_y_velocity * dt + 0.5f * acceleration * (dt * dt);
 
     if (pos.y < m_floor_limit) {
         pos.y = m_floor_limit;

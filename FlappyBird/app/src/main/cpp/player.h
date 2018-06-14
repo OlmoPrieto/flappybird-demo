@@ -15,7 +15,7 @@ private:
     float m_y_velocity = 0.0f;
     float m_y_force = 0.0f;
     float m_floor_limit = -0.91f;
-    float m_impulse_amount = 100.0f;
+    float m_impulse_amount = 0.0017f;
 
 public:
     Player();
