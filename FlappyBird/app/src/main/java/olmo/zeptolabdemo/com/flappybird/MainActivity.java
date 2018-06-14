@@ -7,6 +7,7 @@ import android.content.pm.ConfigurationInfo;
 import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
 //    }
 
     private GLSurfaceView glSurfaceView;
+    private RendererWrapper rendererWrapper;
     private boolean rendererSet;
 
     @Override
@@ -42,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
             glSurfaceView = new GLSurfaceView(this);
 
             glSurfaceView.setEGLContextClientVersion(2);
-            glSurfaceView.setRenderer(new RendererWrapper());
+            rendererWrapper = new RendererWrapper();
+            glSurfaceView.setRenderer(rendererWrapper);
 
             rendererSet = true;
             setContentView(glSurfaceView);
@@ -53,6 +56,21 @@ public class MainActivity extends AppCompatActivity {
 
             return;
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent me) {
+        switch (me.getAction()) {
+            case MotionEvent.ACTION_DOWN : {
+
+                rendererWrapper.onTouchEvent(me.getX(), me.getY());
+
+                return true;
+                //break;
+            }
+        }
+
+        return false;
     }
 
     @Override

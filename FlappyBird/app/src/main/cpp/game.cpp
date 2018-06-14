@@ -247,8 +247,6 @@ void Game::onSurfaceCreated() {
     // ALWAYS FIRST
     setupOpenGL();
 
-    m_sprites.emplace_back();
-
     Vec3 pos(1.5f, 0.0f, 0.0f);
     for (uint32_t i = 0; i < m_max_obstacles; ++i) {
         //Obstacle obs;
@@ -264,6 +262,10 @@ void Game::onSurfaceCreated() {
 
 void Game::onSurfaceChanged(int width, int height) {
     // Do nothing
+}
+
+void Game::registerEvent(float x, float y) {
+    m_events.emplace( x, y );
 }
 
 void Game::drawSprite(Sprite* sprite) {
@@ -303,11 +305,18 @@ void Game::drawSprite(Sprite* sprite) {
 void Game::onDrawFrame() {
     m_time1 = m_clock.now();
 
-    //__android_log_print(ANDROID_LOG_INFO, "LOG", "frame_time: %.2f\n", m_prev_time);
-    for (uint32_t i = 0; i < m_sprites.size(); ++i) {
-        m_sprites[i].update(m_prev_time);
-        //drawSprite(&m_sprites[i]);
+    // Check for taps
+    Event e;
+    while (m_events.size() > 0) {
+        e = m_events.front();
+        m_events.pop();
+
+        m_player.addForce();
     }
+
+    //__android_log_print(ANDROID_LOG_INFO, "LOG", "frame_time: %.2f\n", m_prev_time);
+
+    m_player.update(m_prev_time);
 
     for (uint32_t i = 0; i < m_obstacles.size(); ++i) {
         m_obstacles[i].update(m_prev_time);
@@ -315,6 +324,10 @@ void Game::onDrawFrame() {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // Draw player
+    drawSprite(m_player.getSprite());
+
+    // Draw obstacles
     Obstacle* obstacle = nullptr;
     Sprite* upper = nullptr;
     Sprite* lower = nullptr;

@@ -27,6 +27,12 @@ JNIEXPORT void JNICALL Java_olmo_zeptolabdemo_com_flappybird_GameLibJNIWrapper_o
     Game::Instance()->onDrawFrame();
 }
 
+JNIEXPORT void JNICALL Java_olmo_zeptolabdemo_com_flappybird_GameLibJNIWrapper_onTouchEvent
+        (JNIEnv *env, jclass clss, jfloat x, jfloat y) {
+
+    Game::Instance()->registerEvent(x, y);
+}
+
 #ifdef __cplusplus
 };
 #endif

@@ -8,11 +8,26 @@
 #include <GLES2/gl2.h>
 
 #include <chrono>
+#include <queue>
 #include <vector>
 
 #include "obstacle.h"
+#include "player.h"
 #include "sprite.h"
 #include "utils.h"
+
+struct Event {
+    float x;
+    float y;
+
+    Event() : x(0.0f), y(0.0f) {
+
+    }
+
+    Event(float _x, float _y) : x(_x), y(_y) {
+
+    }
+};
 
 class Game {
 private:
@@ -20,8 +35,11 @@ private:
     void setupOpenGL();
     void drawSprite(Sprite* sprite);
 
+    Player m_player;
+
     std::vector<Sprite> m_sprites;
     std::vector<Obstacle> m_obstacles;
+    std::queue<Event> m_events;
     std::chrono::high_resolution_clock m_clock;
     std::chrono::high_resolution_clock::time_point m_time1;
     std::chrono::high_resolution_clock::time_point m_time2;
@@ -54,6 +72,7 @@ public:
     void onSurfaceCreated();
     void onSurfaceChanged(int width, int height);
     void onDrawFrame();
+    void registerEvent(float x, float y);
 };
 
 #endif //FLAPPYBIRD_GAME_H

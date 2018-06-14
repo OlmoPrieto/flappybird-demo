@@ -27,6 +27,7 @@ add_library( # Sets the name of the library.
              src/main/jni/jni.cpp
              src/main/cpp/sprite.cpp
              src/main/cpp/obstacle.cpp
+             src/main/cpp/player.cpp
 
              )
 

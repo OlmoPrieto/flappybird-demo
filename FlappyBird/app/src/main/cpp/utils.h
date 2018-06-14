@@ -75,6 +75,54 @@ struct Vec3 {
     Vec3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {
 
     }
+
+    void operator += (const Vec3& other) {
+        x += other.x;
+        y += other.y;
+        z += other.z;
+    }
+
+    void operator -= (const Vec3& other) {
+        x -= other.x;
+        y -= other.y;
+        z -= other.z;
+    }
+
+    Vec3 operator + (const Vec3& other) {
+        Vec3 result;
+        result.x = x + other.x;
+        result.y = y + other.y;
+        result.z = z + other.z;
+
+        return result;
+    }
+
+    Vec3 operator - (const Vec3& other) {
+        Vec3 result;
+        result.x = x - other.x;
+        result.y = y - other.y;
+        result.z = z - other.z;
+
+        return result;
+    }
+
+    void operator += (float f) {
+        x += f;
+        y += f;
+        z += f;
+    }
+
+    void operator -= (float f) {
+        x -= f;
+        y -= f;
+        z -= f;
+    }
+
+    void operator *= (float f) {
+        x *= f;
+        y *= f;
+        z *= f;
+    }
 };
 
 struct Color {
@@ -109,6 +157,16 @@ struct Color {
         c.r = (uint8_t)(rand() % 255);
         c.g = (uint8_t)(rand() % 255);
         c.b = (uint8_t)(rand() % 255);
+
+        if (c.r < 128) {
+            c.r = 128;
+        }
+        if (c.g < 128) {
+            c.g = 128;
+        }
+        if (c.b < 128) {
+            c.b = 128;
+        }
 
         c.a = 255; // ??
 
