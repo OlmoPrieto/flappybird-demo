@@ -42,12 +42,14 @@ static const char* vertex_shader_text =
 
 static const char* fragment_shader_text =
 "#version 100\n"
-"uniform vec3 color;\n"
+"uniform vec4 color;\n"
 "varying vec2 o_uv;\n"
 "uniform sampler2D tex;\n"
 "void main() {\n"
 //"  gl_FragColor = vec4(color.x, color.y, color.z, 1.0);\n"
-"  gl_FragColor = texture2D(tex, o_uv) * vec4(color, 1.0);\n"
+//"  vec4 tha_color = texture2D(tex, o_uv);\n"
+//"  if (tha_color.w < 1.0) { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); } else { gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0); }\n"
+"  gl_FragColor = texture2D(tex, o_uv) * color;\n"
 //"  gl_FragColor = vec4(o_uv.x, o_uv.y, 0.0, 1.0);\n"
 "}\n";
 
@@ -269,8 +271,9 @@ void Game::registerEvent(float x, float y) {
 
 void Game::drawSprite(Sprite* sprite) {
     Color c = sprite->getColor();
-    glUniform3f(m_color_location, (float)c.r / (float)255, (float)c.g / (float)255, (float)c.b / (float)255);
-    CheckGLError("glUniform3f");
+    glUniform4f(m_color_location, (float)c.r / (float)255, (float)c.g / (float)255,
+                (float)c.b / (float)255, (float)c.a / (float)255);
+    CheckGLError("glUniform4f");
 
     glBindTexture(GL_TEXTURE_2D, sprite->getTextureHandler());
 
@@ -307,7 +310,10 @@ void Game::onDrawFrame() {
     // Check for taps
     Event e;
     while (m_events.size() > 0) {
-        if (m_can_move == false) {
+        if (m_can_move == true) {
+            m_player.addForce();
+        }
+        else {
             m_can_move = true;
 
             m_player.start();
@@ -316,8 +322,6 @@ void Game::onDrawFrame() {
 
         e = m_events.front();
         m_events.pop();
-
-        m_player.addForce();
     }
 
     //__android_log_print(ANDROID_LOG_INFO, "LOG", "frame_time: %.2f\n", m_prev_time);
@@ -329,7 +333,7 @@ void Game::onDrawFrame() {
 
         if (m_player.checkCollision(&m_obstacles[i])) {
             m_can_move = false;
-            m_player.stop();
+            //m_player.stop();
             Obstacle::stop();
 
             break;
@@ -348,6 +352,10 @@ void Game::onDrawFrame() {
         }
     }
 
+    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw obstacles
@@ -363,6 +371,7 @@ void Game::onDrawFrame() {
         drawSprite(lower);
     }
 
+    //glDisable(GL_DEPTH_TEST);
     // Draw player after so it appears in front of the obstacles
     drawSprite(m_player.getSprite());
 

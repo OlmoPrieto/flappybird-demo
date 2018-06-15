@@ -11,13 +11,9 @@ Sprite::Sprite() {
     m_scale.y = 1.0f;
     m_scale.z = 1.0f;
 
-    //m_color.setRandom();
-
     m_texture_width = 1024;
     m_texture_height = 1024;
     m_texture = (uint8_t*)malloc(m_texture_width * m_texture_height * 4);
-    //CreateCircleInTexture(m_texture, m_texture_width, m_texture_height, Color(255, 0, 0, 255));
-    //SetTextureColor(m_texture, m_texture_width, m_texture_height, Color(0, 255, 0, 255));
 
     glGenTextures(1, &m_texture_id);
     glBindTexture(GL_TEXTURE_2D, m_texture_id);

@@ -126,6 +126,7 @@ void Obstacle::randomizeSpritesTint() {
     color.g = (uint8_t)m_random_generator() % 255;
     color.b = (uint8_t)m_random_generator() % 255;
     color.a = (uint8_t)m_random_generator() % 255;
+    color.a = 255;
 
     m_upper.setColor(color);
     m_lower.setColor(color);

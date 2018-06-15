@@ -8,6 +8,8 @@
 
 Player::Player() {
     m_sprite.setScale(0.135f, 0.081f, 1.0f);
+    m_sprite.setColor(255, 255, 255, 0);
+    //m_sprite.setPositionZ(1.0f);
 
     uint8_t** texture_data = m_sprite.getTextureData();
     CreateCircleInTexture(*texture_data, m_sprite.getTextureWidth(),
