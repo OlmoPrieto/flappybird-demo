@@ -63,6 +63,8 @@ private:
 
     float m_prev_time = 0.0f;
 
+    bool m_can_move = false;
+
     static Game* m_game;
 
 public:

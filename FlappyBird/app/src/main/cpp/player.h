@@ -6,6 +6,7 @@
 #define FLAPPYBIRD_PLAYER_H
 
 #include "sprite.h"
+#include "obstacle.h"
 
 class Player {
 private:
@@ -15,7 +16,9 @@ private:
     float m_y_velocity = 0.0f;
     float m_y_force = 0.0f;
     float m_floor_limit = -0.91f;
-    float m_impulse_amount = 0.0017f;
+    float m_impulse_amount = 0.0018f;
+
+    bool m_can_move = false;
 
 public:
     Player();
@@ -24,6 +27,11 @@ public:
     Sprite* getSprite();
 
     void addForce();
+
+    bool checkCollision(Obstacle* obs);
+
+    void stop();
+    void start();
 
     void update(float dt);
 };

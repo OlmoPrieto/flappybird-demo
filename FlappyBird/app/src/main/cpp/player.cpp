@@ -7,7 +7,7 @@
 #include "player.h"
 
 Player::Player() {
-    m_sprite.setScale(0.15f, 0.09f, 1.0f);
+    m_sprite.setScale(0.135f, 0.081f, 1.0f);
 
     uint8_t** texture_data = m_sprite.getTextureData();
     CreateCircleInTexture(*texture_data, m_sprite.getTextureWidth(),
@@ -25,24 +25,162 @@ Sprite* Player::getSprite() {
 
 void Player::addForce() {
     m_y_velocity = m_impulse_amount;
-    __android_log_print(ANDROID_LOG_INFO, "LOG", "TOUCH!\n");
+}
+
+bool Player::checkCollision(Obstacle *obs) {
+    float up  = 0.0f;
+    float ri  = 0.0f;
+    float bo  = 0.0f;
+    float le  = 0.0f;
+    float oup = 0.0f;
+    float ori = 0.0f;
+    float obo = 0.0f;
+    float ole = 0.0f;
+
+    Vec3 pos = m_sprite.getPosition();
+    Vec3 scale = m_sprite.getScale();
+
+    Vec3 other_pos;
+    Vec3 other_scale;
+
+    // Check player's upper Bounding Box against the obstacle
+    other_pos   = obs->getUpperSprite()->getPosition();
+    other_scale = obs->getUpperSprite()->getScale();
+
+    up = pos.y + scale.y;
+    ri = pos.x + scale.x * 0.85f;
+    bo = pos.y + scale.y * 0.85f;
+    le = pos.x - scale.x * 0.85f;
+
+    oup = other_pos.y + other_scale.y;
+    ori = other_pos.x + other_scale.x;
+    obo = other_pos.y - other_scale.y;
+    ole = other_pos.x - other_scale.x;
+
+    if (ri >= ole && le <= ori && up >= obo && bo <= oup) {
+        // collided
+        __android_log_print(ANDROID_LOG_INFO, "LOG", "UP Collided with top!\n");
+        return true;
+    }
+    else {
+        other_pos   = obs->getLowerSprite()->getPosition();
+        other_scale = obs->getLowerSprite()->getScale();
+
+        oup = other_pos.y + other_scale.y;
+        ori = other_pos.x + other_scale.x;
+        obo = other_pos.y - other_scale.y;
+        ole = other_pos.x - other_scale.x;
+
+        if (ri >= ole && le <= ori && up >= obo && bo <= oup) {
+            // collided
+            __android_log_print(ANDROID_LOG_INFO, "LOG", "UP Collided with bottom!\n");
+            return true;
+        }
+    }
+
+    // Check player's right Bounding Box against the obstacle
+    other_pos   = obs->getUpperSprite()->getPosition();
+    other_scale = obs->getUpperSprite()->getScale();
+
+    up = pos.y + scale.y * 0.85f;
+    ri = pos.x + scale.x;
+    bo = pos.y - scale.y * 0.85f;
+    le = pos.x + scale.x * 0.85f;
+
+    oup = other_pos.y + other_scale.y;
+    ori = other_pos.x + other_scale.x;
+    obo = other_pos.y - other_scale.y;
+    ole = other_pos.x - other_scale.x;
+
+    if (ri >= ole && le <= ori && up >= obo && bo <= oup) {
+        // collided
+        __android_log_print(ANDROID_LOG_INFO, "LOG", "RIGHT Collided with top!\n");
+        return true;
+    }
+    else {
+        other_pos   = obs->getLowerSprite()->getPosition();
+        other_scale = obs->getLowerSprite()->getScale();
+
+        oup = other_pos.y + other_scale.y;
+        ori = other_pos.x + other_scale.x;
+        obo = other_pos.y - other_scale.y;
+        ole = other_pos.x - other_scale.x;
+
+        if (ri >= ole && le <= ori && up >= obo && bo <= oup) {
+            // collided
+            __android_log_print(ANDROID_LOG_INFO, "LOG", "RIGHT Collided with bottom!\n");
+            return true;
+        }
+    }
+
+    // Check player's bottom Bounding Box against the obstacle
+    other_pos   = obs->getUpperSprite()->getPosition();
+    other_scale = obs->getUpperSprite()->getScale();
+
+    up = pos.y - scale.y * 0.85f;
+    ri = pos.x + scale.x * 0.85f;
+    bo = pos.y - scale.y;
+    le = pos.x - scale.x * 0.85f;
+
+    oup = other_pos.y + other_scale.y;
+    ori = other_pos.x + other_scale.x;
+    obo = other_pos.y - other_scale.y;
+    ole = other_pos.x - other_scale.x;
+
+    if (ri >= ole && le <= ori && up >= obo && bo <= oup) {
+        // collided
+        __android_log_print(ANDROID_LOG_INFO, "LOG", "BOTTOM Collided with top!\n");
+        return true;
+    }
+    else {
+        other_pos   = obs->getLowerSprite()->getPosition();
+        other_scale = obs->getLowerSprite()->getScale();
+
+        oup = other_pos.y + other_scale.y;
+        ori = other_pos.x + other_scale.x;
+        obo = other_pos.y - other_scale.y;
+        ole = other_pos.x - other_scale.x;
+
+        if (ri >= ole && le <= ori && up >= obo && bo <= oup) {
+            // collided
+            __android_log_print(ANDROID_LOG_INFO, "LOG", "BOTTOM Collided with bottom!\n");
+            return true;
+        }
+    }
+
+    // There is no check with the player's left Bounding Box
+    // because it's impossible that the player collided with
+    // an obstacle from behind
+
+
+    return false;
+}
+
+void Player::stop() {
+    m_can_move = false;
+}
+
+void Player::start() {
+    m_can_move = true;
 }
 
 void Player::update(float dt) {
-    Vec3 pos = m_sprite.getPosition();
-    float gravity = 0.0f;//-0.000001f;
-    float speed = -0.000075f;//1.0f;
-    float acceleration = m_y_force + gravity;
+    if (m_can_move == true) {
+        Vec3 pos = m_sprite.getPosition();
+        float gravity = -0.000001f;
+        float speed = -0.0000775f;
+        float acceleration = m_y_force + gravity;
 
-    m_y_velocity += speed + acceleration * dt;
+        m_y_velocity += speed + acceleration * dt;
 
-    pos.y += m_y_velocity * dt + 0.5f * acceleration * (dt * dt);
+        pos.y += m_y_velocity * dt + 0.5f * acceleration * (dt * dt);
 
-    if (pos.y < m_floor_limit) {
-        pos.y = m_floor_limit;
+        if (pos.y < m_floor_limit) {
+            pos.y = m_floor_limit;
+        }
+
+        m_sprite.setPositionY(pos.y);
+
+        m_y_force = 0.0f;
     }
-
-    m_sprite.setPositionY(pos.y);
-
-    m_y_force = 0.0f;
 }

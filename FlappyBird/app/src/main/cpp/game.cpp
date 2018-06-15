@@ -264,7 +264,7 @@ void Game::onSurfaceChanged(int width, int height) {
 }
 
 void Game::registerEvent(float x, float y) {
-    m_events.emplace( x, y );
+    m_events.emplace(x, y );
 }
 
 void Game::drawSprite(Sprite* sprite) {
@@ -307,6 +307,13 @@ void Game::onDrawFrame() {
     // Check for taps
     Event e;
     while (m_events.size() > 0) {
+        if (m_can_move == false) {
+            m_can_move = true;
+
+            m_player.start();
+            Obstacle::start();
+        }
+
         e = m_events.front();
         m_events.pop();
 
@@ -319,6 +326,14 @@ void Game::onDrawFrame() {
 
     for (uint32_t i = 0; i < m_max_obstacles; ++i) {
         m_obstacles[i].update(m_prev_time);
+
+        if (m_player.checkCollision(&m_obstacles[i])) {
+            m_can_move = false;
+            m_player.stop();
+            Obstacle::stop();
+
+            break;
+        }
 
         Vec3 pos = m_obstacles[i].getPosition();
         if (pos.x < -1.5f) {
@@ -335,9 +350,6 @@ void Game::onDrawFrame() {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Draw player
-    drawSprite(m_player.getSprite());
-
     // Draw obstacles
     Obstacle* obstacle = nullptr;
     Sprite* upper = nullptr;
@@ -350,6 +362,9 @@ void Game::onDrawFrame() {
         drawSprite(upper);
         drawSprite(lower);
     }
+
+    // Draw player after so it appears in front of the obstacles
+    drawSprite(m_player.getSprite());
 
     // Lock framerate to 60 fps for fast machines
     // Using a spinlock because std::sleep can be imprecise

@@ -9,9 +9,10 @@
 std::mt19937 Obstacle::m_random_generator;
 
 float Obstacle::m_speed = 0.001f;
-float Obstacle::m_gap   = 0.15f;
+float Obstacle::m_gap   = 0.1372f;
 uint32_t Obstacle::m_global_id = 0;
 bool Obstacle::m_random_generator_seeded = false;
+bool Obstacle::m_can_move = false;
 
 Obstacle::Obstacle() {
     // Sprite constructors are called first
@@ -22,11 +23,11 @@ Obstacle::Obstacle() {
         m_random_generator_seeded = true;
     }
 
-    m_upper.setScale(0.1f, 1.0f - m_gap, 1.0f);
-    m_lower.setScale(0.1f, 1.0f - m_gap, 1.0f);
+    m_upper.setScale(0.175f, 1.0f - m_gap, 1.0f);
+    m_lower.setScale(0.175f, 1.0f - m_gap, 1.0f);
 
     //uint32_t random = (uint32_t)rand() % 50;    // max of half the screen up or down
-    uint32_t random = (uint32_t)m_random_generator() % 40;
+    uint32_t random = (uint32_t)m_random_generator() % 75;
     __android_log_print(ANDROID_LOG_INFO, "LOG", "random: %u\n", random);
     float height = (float)random / 100.0f;
 
@@ -131,8 +132,14 @@ void Obstacle::randomizeSpritesTint() {
 }
 
 void Obstacle::randomizeHeight() {
-    uint32_t random = (uint32_t)m_random_generator() % 40;
+    uint32_t random = 0;
+    // if it only generates once, the distribution isn't that good
+    // and repeated or similar values appear
+    for (uint8_t i = 0; i < 64; ++i) {
+        random = (uint32_t)m_random_generator() % 40;
+    }
     __android_log_print(ANDROID_LOG_INFO, "LOG", "random: %u\n", random);
+    random += 10;
     float height = (float)random / 100.0f;
 
     if (rand() % 1 == 0) {  // decide if up or down
@@ -143,11 +150,21 @@ void Obstacle::randomizeHeight() {
     m_lower.setPositionY(0.0f - m_gap - 1.0f + height);
 }
 
-void Obstacle::update(float dt) {
-    m_position.x -= m_speed * dt;
+void Obstacle::stop() {
+    m_can_move = false;
+}
 
-    Vec3 pos = m_upper.getPosition();
-    m_upper.setPositionX(pos.x - m_speed * dt);
-    pos = m_lower.getPosition();
-    m_lower.setPositionX(pos.x - m_speed * dt);
+void Obstacle::start() {
+    m_can_move = true;
+}
+
+void Obstacle::update(float dt) {
+    if (m_can_move == true) {
+        m_position.x -= m_speed * dt;
+
+        Vec3 pos = m_upper.getPosition();
+        m_upper.setPositionX(pos.x - m_speed * dt);
+        pos = m_lower.getPosition();
+        m_lower.setPositionX(pos.x - m_speed * dt);
+    }
 }

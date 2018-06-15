@@ -23,6 +23,7 @@ private:
     static float m_gap;
     static uint32_t m_global_id;
     static bool m_random_generator_seeded;
+    static bool m_can_move;
 
     uint32_t m_id = 0;
 
@@ -40,6 +41,7 @@ public:
     void setAvailable();
 
     Vec3 getPosition() const;
+
     void setPosition(const Vec3& position);
     void setPosition(float x, float y, float z);
 
@@ -50,6 +52,9 @@ public:
     void moveSpritesBy(const Vec3& offset);
     void randomizeSpritesTint();
     void randomizeHeight();
+
+    static void stop();
+    static void start();
 
     void update(float dt);
 };

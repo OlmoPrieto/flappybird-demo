@@ -228,4 +228,31 @@ static void CreateCircleInTexture(uint8_t* texture, uint32_t width, uint32_t hei
     }
 }
 
+struct BoundingBox {
+    float top_left;
+    float bottom_left;
+    float top_right;
+    float bottom_right;
+
+    BoundingBox() : top_left(0.0f), bottom_left(0.0f),
+                    top_right(0.0f), bottom_right(0.0f) {
+
+    }
+
+    BoundingBox(float tl, float bl, float tr, float br) :
+            top_left(tl), bottom_left(bl),
+            top_right(tr), bottom_right(br) {
+
+    }
+
+    bool checkAgainstBoundingBox(const BoundingBox& other) {
+        if (top_left >= other.top_left && top_right <= other.top_right &&
+                top_left >= other.top_left && bottom_left <= other.bottom_left) {
+            return true;
+        }
+
+        return false;
+    }
+};
+
 #endif //FLAPPYBIRD_UTILS_H
