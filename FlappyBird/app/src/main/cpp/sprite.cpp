@@ -51,6 +51,17 @@ uint32_t Sprite::getTextureHandler() const {
     return m_texture_id;
 }
 
+void Sprite::setColor(const Color &color) {
+    m_color = color;
+}
+
+void Sprite::setColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    m_color.r = r;
+    m_color.g = g;
+    m_color.b = b;
+    m_color.a = a;
+}
+
 void Sprite::setPosition(const Vec3 &position) {
     m_position = position;
 }

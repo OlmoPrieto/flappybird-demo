@@ -29,6 +29,8 @@ public:
     Vec3 getPosition() const;
     Vec3 getScale() const;
 
+    void setColor(const Color& color);  // The color is the tint (used in the shader)
+    void setColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a);  // The color is the tint (used in the shader)
     void setPosition(const Vec3& position);
     void setPosition(float x, float y, float z);
     void setPositionX(float x);

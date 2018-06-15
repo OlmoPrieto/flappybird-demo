@@ -6,17 +6,28 @@
 
 #include "obstacle.h"
 
+std::mt19937 Obstacle::m_random_generator;
+
 float Obstacle::m_speed = 0.001f;
 float Obstacle::m_gap   = 0.15f;
 uint32_t Obstacle::m_global_id = 0;
+bool Obstacle::m_random_generator_seeded = false;
 
 Obstacle::Obstacle() {
     // Sprite constructors are called first
 
+    if (m_random_generator_seeded == false) {
+        m_random_generator.seed(std::chrono::duration_cast<std::chrono::duration<int32_t > >(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+
+        m_random_generator_seeded = true;
+    }
+
     m_upper.setScale(0.1f, 1.0f - m_gap, 1.0f);
     m_lower.setScale(0.1f, 1.0f - m_gap, 1.0f);
 
-    uint32_t random = (uint32_t)rand() % 75;    // max of half the screen up or down
+    //uint32_t random = (uint32_t)rand() % 50;    // max of half the screen up or down
+    uint32_t random = (uint32_t)m_random_generator() % 40;
+    __android_log_print(ANDROID_LOG_INFO, "LOG", "random: %u\n", random);
     float height = (float)random / 100.0f;
 
     if (rand() % 1 == 0) {  // decide if up or down
@@ -78,9 +89,9 @@ void Obstacle::setSpritesPositions() {
     m_lower.setPosition(m_position.x + pos.x, m_position.y + pos.y, m_position.z + pos.z);
 }
 
-void Obstacle::setSpritesPositions(const Vec3& pos) {
-    m_upper.setPosition(pos);
-    m_lower.setPosition(pos);
+void Obstacle::setSpritesXPositions(float pos) {
+    m_upper.setPositionX(pos);
+    m_lower.setPositionX(pos);
 }
 
 void Obstacle::moveSpritesBy(const Vec3& offset) {
@@ -106,6 +117,30 @@ void Obstacle::setPosition(float x, float y, float z) {
 
 uint32_t Obstacle::getID() const {
     return m_id;
+}
+
+void Obstacle::randomizeSpritesTint() {
+    Color color;
+    color.r = (uint8_t)m_random_generator() % 255;
+    color.g = (uint8_t)m_random_generator() % 255;
+    color.b = (uint8_t)m_random_generator() % 255;
+    color.a = (uint8_t)m_random_generator() % 255;
+
+    m_upper.setColor(color);
+    m_lower.setColor(color);
+}
+
+void Obstacle::randomizeHeight() {
+    uint32_t random = (uint32_t)m_random_generator() % 40;
+    __android_log_print(ANDROID_LOG_INFO, "LOG", "random: %u\n", random);
+    float height = (float)random / 100.0f;
+
+    if (rand() % 1 == 0) {  // decide if up or down
+        height = -height;   // multiplying by -1.0f is another operation, so don't do it
+    }
+
+    m_upper.setPositionY(0.0f + m_gap + 1.0f + height);
+    m_lower.setPositionY(0.0f - m_gap - 1.0f + height);
 }
 
 void Obstacle::update(float dt) {

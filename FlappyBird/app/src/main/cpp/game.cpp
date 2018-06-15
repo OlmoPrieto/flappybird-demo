@@ -327,7 +327,9 @@ void Game::onDrawFrame() {
             pos.x = m_obstacles[m_obstacle_index++ % m_max_obstacles].getPosition().x + 1.5f;
 
             m_obstacles[i].setPosition(pos);
-            m_obstacles[i].setSpritesPositions(Vec3(pos.x, 0.0f, 0.0f));
+            m_obstacles[i].setSpritesXPositions(pos.x);
+            m_obstacles[i].randomizeSpritesTint();
+            m_obstacles[i].randomizeHeight();
         }
     }
 

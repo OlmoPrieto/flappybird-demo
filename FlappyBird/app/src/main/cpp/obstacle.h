@@ -5,10 +5,14 @@
 #ifndef FLAPPYBIRD_OBSTACLE_H
 #define FLAPPYBIRD_OBSTACLE_H
 
+#include <random>
+
 #include "sprite.h"
 
 class Obstacle {
 private:
+    static std::mt19937 m_random_generator;
+
     Sprite m_upper;
     Sprite m_lower;
 
@@ -18,6 +22,7 @@ private:
     static float m_speed;
     static float m_gap;
     static uint32_t m_global_id;
+    static bool m_random_generator_seeded;
 
     uint32_t m_id = 0;
 
@@ -41,8 +46,10 @@ public:
     uint32_t getID() const;
 
     void setSpritesPositions();
-    void setSpritesPositions(const Vec3& pos);
+    void setSpritesXPositions(float pos);
     void moveSpritesBy(const Vec3& offset);
+    void randomizeSpritesTint();
+    void randomizeHeight();
 
     void update(float dt);
 };
