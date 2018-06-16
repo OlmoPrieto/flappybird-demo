@@ -26,17 +26,7 @@ Obstacle::Obstacle() {
     m_upper.setScale(0.175f, 1.0f - m_gap, 1.0f);
     m_lower.setScale(0.175f, 1.0f - m_gap, 1.0f);
 
-    //uint32_t random = (uint32_t)rand() % 50;    // max of half the screen up or down
-    uint32_t random = (uint32_t)m_random_generator() % 75;
-    __android_log_print(ANDROID_LOG_INFO, "LOG", "random: %u\n", random);
-    float height = (float)random / 100.0f;
-
-    if (rand() % 1 == 0) {  // decide if up or down
-        height = -height;   // multiplying by -1.0f is another operation, so don't do it
-    }
-
-    m_upper.setPositionY(0.0f + m_gap + 1.0f + height);
-    m_lower.setPositionY(0.0f - m_gap - 1.0f + height);
+    randomizeHeight();
 
     Color color(Color::randomColor());
 
@@ -125,8 +115,17 @@ void Obstacle::randomizeSpritesTint() {
     color.r = (uint8_t)m_random_generator() % 255;
     color.g = (uint8_t)m_random_generator() % 255;
     color.b = (uint8_t)m_random_generator() % 255;
-    color.a = (uint8_t)m_random_generator() % 255;
+    //color.a = (uint8_t)m_random_generator() % 255;
     color.a = 255;
+
+    if (color.r < 128) {
+        color.r = 128;
+    }
+    if (color.g < 128) {
+        color.g = 128;
+    }if (color.b < 128) {
+        color.b = 128;
+    }
 
     m_upper.setColor(color);
     m_lower.setColor(color);
@@ -143,7 +142,7 @@ void Obstacle::randomizeHeight() {
     random += 10;
     float height = (float)random / 100.0f;
 
-    if (rand() % 1 == 0) {  // decide if up or down
+    if ((uint32_t)m_random_generator() % 100 >= 50) {  // decide if up or down
         height = -height;   // multiplying by -1.0f is another operation, so don't do it
     }
 

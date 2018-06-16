@@ -47,8 +47,6 @@ static const char* fragment_shader_text =
 "uniform sampler2D tex;\n"
 "void main() {\n"
 //"  gl_FragColor = vec4(color.x, color.y, color.z, 1.0);\n"
-//"  vec4 tha_color = texture2D(tex, o_uv);\n"
-//"  if (tha_color.w < 1.0) { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); } else { gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0); }\n"
 "  gl_FragColor = texture2D(tex, o_uv) * color;\n"
 //"  gl_FragColor = vec4(o_uv.x, o_uv.y, 0.0, 1.0);\n"
 "}\n";
@@ -98,6 +96,10 @@ bool CheckGLError(const char* tag = "") {
 void Game::setupOpenGL() {
     printf("Initializing OpenGL...\n");
 
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     m_vertices[0] = { -1.0f,  1.0f, 0.0f };
     m_vertices[1] = { -1.0f, -1.0f, 0.0f };
@@ -185,15 +187,18 @@ void Game::setupOpenGL() {
     m_mvp_location = glGetUniformLocation(program_id, "MVP");
     m_color_location = glGetUniformLocation(program_id, "color");
 
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertices_index);
     m_position_location = glGetAttribLocation(program_id, "position");
     glEnableVertexAttribArray(m_position_location);
     CheckGLError("glEnableVertexAttribArray position");
+    glVertexAttribPointer(m_position_location, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+    CheckGLError("glVertexAttribPointer position");
 
     m_uvs_location = glGetAttribLocation(program_id, "uv");
     glEnableVertexAttribArray(m_uvs_location);
     CheckGLError("glEnableVertexAttribArray uvs");
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_vertices_index);
+    //glBindBuffer(GL_ARRAY_BUFFER, m_vertices_index);
     glVertexAttribPointer(m_uvs_location, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)sizeof(m_vertices));
     CheckGLError("glVertexAttribPointer uvs");
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -231,6 +236,7 @@ void Game::setupOpenGL() {
     m_projection.matrix[14] = 0.0f;
     m_projection.matrix[15] = 1.0f;
 
+    //glClearColor((float)108 / 255, (float)211 / 255, (float)255 / 255, 0.0f);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     glUseProgram(program_id);
@@ -240,25 +246,39 @@ void Game::setupOpenGL() {
 }
 
 void Game::onSurfaceCreated() {
+    // ALWAYS FIRST
+    setupOpenGL();
+
     srand(std::chrono::duration_cast<std::chrono::duration<int32_t > >(m_clock.now().time_since_epoch()).count());
+
+    for (uint32_t i = 0; i < m_max_obstacles; ++i) {
+        m_obstacles.emplace_back();
+    }
+    resetGame();
+}
+
+void Game::resetGame() {
+    Vec3 pos(m_gap_between_obstacles, 0.0f, 0.0f);
+    for (uint32_t i = 0; i < m_max_obstacles; ++i) {
+        m_obstacles[i].setPosition(pos.x * (i + 1), pos.y, pos.z);
+        m_obstacles[i].setSpritesXPositions(pos.x * (i + 1));
+
+        m_obstacles[i].randomizeSpritesTint();
+        m_obstacles[i].randomizeHeight();
+
+        m_obstacles[i].stop();
+    }
+
+    m_player.setPosition(0.0f, 0.0f, 0.0f);
+    m_player.stop();
 
     m_time1 = m_clock.now();
     m_time2 = m_clock.now();
     m_prev_time = std::chrono::duration_cast<std::chrono::duration<float> >(m_time2 - m_time1).count();
 
-    // ALWAYS FIRST
-    setupOpenGL();
+    m_obstacle_index = m_max_obstacles - 1;
 
-    Vec3 pos(1.5f, 0.0f, 0.0f);
-    for (uint32_t i = 0; i < m_max_obstacles; ++i) {
-        m_obstacles.emplace_back();
-        m_obstacles[i].setPosition(pos.x * (i + 1), pos.y, pos.z);
-        //m_obstacles[i].moveSpritesBy(m_obstacles[i].getPosition());
-        m_obstacles[i].setSpritesPositions();
-    }
-    for (uint32_t i = 0; i < m_max_obstacles; ++i) {
-        //m_obstacles[i].setPosition(pos.x * (i + 1), pos.y, pos.z);
-    }
+    m_game_over = false;
 }
 
 void Game::onSurfaceChanged(int width, int height) {
@@ -290,8 +310,6 @@ void Game::drawSprite(Sprite* sprite) {
     };
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), &vertices);
     CheckGLError("glBufferSubData");
-    glVertexAttribPointer(m_position_location, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-    CheckGLError("glVertexAttribPointer position");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indices_index);
     CheckGLError("glBindBuffer GL_ELEMENT_ARRAY_BUFFER");
@@ -310,15 +328,26 @@ void Game::onDrawFrame() {
     // Check for taps
     Event e;
     while (m_events.size() > 0) {
-        if (m_can_move == true) {
-            m_player.addForce();
+        if (m_game_over == true) {
+            if (m_player.isTouchingGround()) {
+                resetGame();
+            }
+
+            while (m_events.size() > 0) {
+                m_events.pop();
+            }
+
+            break;
         }
-        else {
+
+        if (m_can_move == false) {
             m_can_move = true;
 
             m_player.start();
             Obstacle::start();
         }
+
+        m_player.addForce();
 
         e = m_events.front();
         m_events.pop();
@@ -326,14 +355,14 @@ void Game::onDrawFrame() {
 
     //__android_log_print(ANDROID_LOG_INFO, "LOG", "frame_time: %.2f\n", m_prev_time);
 
-    m_player.update(m_prev_time);
-
+    // Update the obstacles
     for (uint32_t i = 0; i < m_max_obstacles; ++i) {
         m_obstacles[i].update(m_prev_time);
 
         if (m_player.checkCollision(&m_obstacles[i])) {
+            m_game_over = true;
             m_can_move = false;
-            //m_player.stop();
+            //m_player.stop();  // don't stop player so it falls
             Obstacle::stop();
 
             break;
@@ -343,7 +372,7 @@ void Game::onDrawFrame() {
         if (pos.x < -1.5f) {
             __android_log_print(ANDROID_LOG_INFO, "LOG", "%u\n", m_obstacle_index % m_max_obstacles);
             // set that obstacle behind the last one
-            pos.x = m_obstacles[m_obstacle_index++ % m_max_obstacles].getPosition().x + 1.5f;
+            pos.x = m_obstacles[m_obstacle_index++ % m_max_obstacles].getPosition().x + m_gap_between_obstacles;
 
             m_obstacles[i].setPosition(pos);
             m_obstacles[i].setSpritesXPositions(pos.x);
@@ -352,16 +381,22 @@ void Game::onDrawFrame() {
         }
     }
 
-    //glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendFunc(GL_ONE, GL_ONE);
+    // Update the player
+    m_player.update(m_prev_time);
+    if (m_player.isTouchingGround()) {
+        m_game_over = true;
+        m_can_move = false;
+        m_player.stop();
+        Obstacle::stop();
+    }
+
+    // Actual draw
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw obstacles
     Obstacle* obstacle = nullptr;
-    Sprite* upper = nullptr;
-    Sprite* lower = nullptr;
+    Sprite*   upper    = nullptr;
+    Sprite*   lower    = nullptr;
     for (uint32_t i = 0; i < m_max_obstacles; ++i) {
         obstacle = &m_obstacles[i];
         upper = obstacle->getUpperSprite();
@@ -371,7 +406,6 @@ void Game::onDrawFrame() {
         drawSprite(lower);
     }
 
-    //glDisable(GL_DEPTH_TEST);
     // Draw player after so it appears in front of the obstacles
     drawSprite(m_player.getSprite());
 

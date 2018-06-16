@@ -174,7 +174,8 @@ struct Color {
     }
 };
 
-static void SetTextureColor(uint8_t* texture, uint32_t width, uint32_t height, const Color& c) {
+static void SetTextureColor(uint8_t* texture, uint32_t width, uint32_t height,
+                            const Color& c, bool with_outline = false, uint32_t thickness = 1) {
 //        uint32_t color = ((c.r << 24) & 0xFF000000) |
 //                ((c.g << 24) & 0x00FF0000) |
 //                ((c.b << 24) & 0x0000FF00) |
@@ -184,11 +185,23 @@ static void SetTextureColor(uint8_t* texture, uint32_t width, uint32_t height, c
 
     uint8_t* ptr = texture;
     for (uint32_t i = 0; i < width * height * 4; i += 4) {
-        *(ptr + 0) = c.r;
-        *(ptr + 1) = c.g;
-        *(ptr + 2) = c.b;
-        *(ptr + 3) = c.a;
+        if (with_outline == true &&
+           (i < width * thickness ||                            // upper border
+            i > (width * height * 4) - (width * thickness) ||   // lower border
+            i % width <= thickness - 1 ||                       // left border
+            i % width - thickness >= width - thickness)) {      // right border
 
+            *(ptr + 0) = 0;
+            *(ptr + 1) = 0;
+            *(ptr + 2) = 0;
+            *(ptr + 3) = 0;
+        }
+        else {
+            *(ptr + 0) = c.r;
+            *(ptr + 1) = c.g;
+            *(ptr + 2) = c.b;
+            *(ptr + 3) = c.a;
+        }
         ptr += 4;
     }
 }

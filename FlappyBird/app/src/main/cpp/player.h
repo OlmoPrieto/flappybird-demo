@@ -15,8 +15,10 @@ private:
     Vec3 m_velocity;
     float m_y_velocity = 0.0f;
     float m_y_force = 0.0f;
-    float m_floor_limit = -0.91f;
-    float m_impulse_amount = 0.0018f;
+    float m_impulse_amount = 0.0019f;
+    float m_gravity = -0.0000015f;
+    float m_speed = -0.00008f;
+    float m_floor_limit = -0.92f;
 
     bool m_can_move = false;
 
@@ -26,9 +28,13 @@ public:
 
     Sprite* getSprite();
 
+    void setPosition(const Vec3& pos);
+    void setPosition(float x, float y, float z);
+
     void addForce();
 
     bool checkCollision(Obstacle* obs);
+    bool isTouchingGround();
 
     void stop();
     void start();

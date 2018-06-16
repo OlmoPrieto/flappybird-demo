@@ -34,6 +34,7 @@ private:
     Game();
     void setupOpenGL();
     void drawSprite(Sprite* sprite);
+    void resetGame();
 
     Player m_player;
 
@@ -62,8 +63,10 @@ private:
     uint32_t m_obstacle_index = 0;
 
     float m_prev_time = 0.0f;
+    float m_gap_between_obstacles = 1.35f;
 
     bool m_can_move = false;
+    bool m_game_over = false;
 
     static Game* m_game;
 

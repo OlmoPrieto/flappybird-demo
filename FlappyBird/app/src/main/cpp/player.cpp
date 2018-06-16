@@ -8,8 +8,6 @@
 
 Player::Player() {
     m_sprite.setScale(0.135f, 0.081f, 1.0f);
-    m_sprite.setColor(255, 255, 255, 0);
-    //m_sprite.setPositionZ(1.0f);
 
     uint8_t** texture_data = m_sprite.getTextureData();
     CreateCircleInTexture(*texture_data, m_sprite.getTextureWidth(),
@@ -25,8 +23,18 @@ Sprite* Player::getSprite() {
     return &m_sprite;
 }
 
+void Player::setPosition(const Vec3 &pos) {
+    m_sprite.setPosition(pos);
+}
+
+void Player::setPosition(float x, float y, float z) {
+    m_sprite.setPosition(x, y, z);
+}
+
 void Player::addForce() {
-    m_y_velocity = m_impulse_amount;
+    if (m_can_move == true) {
+        m_y_velocity = m_impulse_amount;
+    }
 }
 
 bool Player::checkCollision(Obstacle *obs) {
@@ -158,6 +166,10 @@ bool Player::checkCollision(Obstacle *obs) {
     return false;
 }
 
+bool Player::isTouchingGround() {
+    return m_sprite.getPosition().y == m_floor_limit;
+}
+
 void Player::stop() {
     m_can_move = false;
 }
@@ -169,11 +181,9 @@ void Player::start() {
 void Player::update(float dt) {
     if (m_can_move == true) {
         Vec3 pos = m_sprite.getPosition();
-        float gravity = -0.000001f;
-        float speed = -0.0000775f;
-        float acceleration = m_y_force + gravity;
+        float acceleration = m_y_force + m_gravity;
 
-        m_y_velocity += speed + acceleration * dt;
+        m_y_velocity += m_speed + acceleration * dt;
 
         pos.y += m_y_velocity * dt + 0.5f * acceleration * (dt * dt);
 
