@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release1 {
+            keyAlias 'key0'
+            keyPassword 'olmoprieto14*'
+            storeFile file('C:/Users/Olmo/.android/keystores/android.jks')
+            storePassword 'olmoprieto14*'
+        }
+    }
     compileSdkVersion 26
     defaultConfig {
         applicationId "olmo.zeptolabdemo.com.flappybird"
@@ -28,6 +36,7 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release1
         }
     }
     externalNativeBuild {
@@ -38,12 +47,11 @@ android {
 //              path "src/main/jni/Android.mk"
 //          }
     }
-
-    sourceSets { main { jni.srcDirs = ['src/main/jni' ] } }
+    sourceSets { main { jni.srcDirs = ['src/main/jni'] } }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.1'
     testImplementation 'junit:junit:4.12'

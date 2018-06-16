@@ -170,6 +170,10 @@ bool Player::isTouchingGround() {
     return m_sprite.getPosition().y == m_floor_limit;
 }
 
+bool Player::isTouchingCeiling() {
+    return m_sprite.getPosition().y >= m_ceil_limit;
+}
+
 void Player::stop() {
     m_can_move = false;
 }

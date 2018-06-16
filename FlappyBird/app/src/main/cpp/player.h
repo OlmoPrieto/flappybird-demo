@@ -19,6 +19,7 @@ private:
     float m_gravity = -0.0000015f;
     float m_speed = -0.00008f;
     float m_floor_limit = -0.92f;
+    float m_ceil_limit = 0.92f;
 
     bool m_can_move = false;
 
@@ -35,6 +36,7 @@ public:
 
     bool checkCollision(Obstacle* obs);
     bool isTouchingGround();
+    bool isTouchingCeiling();
 
     void stop();
     void start();

@@ -390,6 +390,12 @@ void Game::onDrawFrame() {
         Obstacle::stop();
     }
 
+    if (m_player.isTouchingCeiling()) {
+        m_game_over = true;
+        m_can_move = false;
+        Obstacle::stop();
+    }
+
     // Actual draw
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
