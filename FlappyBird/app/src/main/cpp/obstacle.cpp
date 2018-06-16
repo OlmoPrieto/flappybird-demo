@@ -30,13 +30,13 @@ Obstacle::Obstacle() {
 
     Color color(Color::randomColor());
 
-    uint8_t** texture_data = m_upper.getTextureData();
-    SetTextureColor(*texture_data, m_upper.getTextureWidth(),
+    uint8_t* texture_data = m_upper.getTextureData();
+    SetTextureColor(texture_data, m_upper.getTextureWidth(),
                     m_upper.getTextureHeight(), color);
     m_upper.setTextureData(texture_data);
 
     texture_data = m_lower.getTextureData();
-    SetTextureColor(*texture_data, m_lower.getTextureWidth(),
+    SetTextureColor(texture_data, m_lower.getTextureWidth(),
                     m_lower.getTextureHeight(), color);
     m_lower.setTextureData(texture_data);
 

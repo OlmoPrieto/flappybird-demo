@@ -27,7 +27,7 @@ Sprite::Sprite() {
 
 Sprite::~Sprite() {
     if (m_texture != nullptr) {
-        //free(m_texture);
+        free(m_texture);
     }
 }
 
@@ -102,16 +102,16 @@ void Sprite::setScaleZ(float z) {
     m_scale.z = z;
 }
 
-void Sprite::setTextureData(uint8_t** data) {
-    m_texture = *data;
+void Sprite::setTextureData(uint8_t* data) {
+    m_texture = data;
     glBindTexture(GL_TEXTURE_2D, m_texture_id);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
                     m_texture_width, m_texture_height, GL_RGBA, GL_UNSIGNED_BYTE, m_texture);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-uint8_t** Sprite::getTextureData() {
-    return &m_texture;
+uint8_t* Sprite::getTextureData() {
+    return m_texture;
 }
 
 uint32_t Sprite::getTextureWidth() const {

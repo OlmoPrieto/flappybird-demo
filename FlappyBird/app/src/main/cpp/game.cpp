@@ -251,6 +251,7 @@ void Game::onSurfaceCreated() {
 
     srand(std::chrono::duration_cast<std::chrono::duration<int32_t > >(m_clock.now().time_since_epoch()).count());
 
+    m_obstacles.reserve(m_max_obstacles);
     for (uint32_t i = 0; i < m_max_obstacles; ++i) {
         m_obstacles.emplace_back();
     }

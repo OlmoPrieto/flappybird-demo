@@ -58,7 +58,7 @@ private:
     GLint m_uvs_location = -1;
     GLuint m_indices[6];
 
-    uint32_t m_max_obstacles = 7;
+    uint32_t m_max_obstacles = 4;
 
     uint32_t m_obstacle_index = 0;
 

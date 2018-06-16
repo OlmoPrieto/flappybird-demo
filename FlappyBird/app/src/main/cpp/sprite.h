@@ -42,10 +42,10 @@ public:
     void setScaleY(float y);
     void setScaleZ(float z);
 
-    void setTextureData(uint8_t** data);
+    void setTextureData(uint8_t* data);
 
     uint32_t getTextureHandler() const;
-    uint8_t** getTextureData();
+    uint8_t* getTextureData();
     uint32_t getTextureWidth() const;
     uint32_t getTextureHeight() const;
 
