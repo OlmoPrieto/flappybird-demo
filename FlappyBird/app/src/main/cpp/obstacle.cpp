@@ -57,18 +57,6 @@ Sprite* Obstacle::getLowerSprite() {
     return &m_lower;
 }
 
-bool Obstacle::isAvailable() const {
-    return m_available;
-}
-
-void Obstacle::setAvailable() {
-    m_available = true;
-}
-
-void Obstacle::setUnavailable() {
-    m_available = false;
-}
-
 Vec3 Obstacle::getPosition() const {
     return m_position;
 }
@@ -138,7 +126,7 @@ void Obstacle::randomizeHeight() {
     for (uint8_t i = 0; i < 64; ++i) {
         random = (uint32_t)m_random_generator() % 40;
     }
-    __android_log_print(ANDROID_LOG_INFO, "LOG", "random: %u\n", random);
+    //__android_log_print(ANDROID_LOG_INFO, "LOG", "random: %u\n", random);
     random += 10;
     float height = (float)random / 100.0f;
 

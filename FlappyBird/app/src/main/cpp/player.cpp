@@ -69,7 +69,7 @@ bool Player::checkCollision(Obstacle *obs) {
 
     if (ri >= ole && le <= ori && up >= obo && bo <= oup) {
         // collided
-        __android_log_print(ANDROID_LOG_INFO, "LOG", "UP Collided with top!\n");
+        //__android_log_print(ANDROID_LOG_INFO, "LOG", "UP Collided with top!\n");
         return true;
     }
     else {
@@ -83,7 +83,7 @@ bool Player::checkCollision(Obstacle *obs) {
 
         if (ri >= ole && le <= ori && up >= obo && bo <= oup) {
             // collided
-            __android_log_print(ANDROID_LOG_INFO, "LOG", "UP Collided with bottom!\n");
+            //__android_log_print(ANDROID_LOG_INFO, "LOG", "UP Collided with bottom!\n");
             return true;
         }
     }
@@ -104,7 +104,7 @@ bool Player::checkCollision(Obstacle *obs) {
 
     if (ri >= ole && le <= ori && up >= obo && bo <= oup) {
         // collided
-        __android_log_print(ANDROID_LOG_INFO, "LOG", "RIGHT Collided with top!\n");
+        //__android_log_print(ANDROID_LOG_INFO, "LOG", "RIGHT Collided with top!\n");
         return true;
     }
     else {
@@ -118,7 +118,7 @@ bool Player::checkCollision(Obstacle *obs) {
 
         if (ri >= ole && le <= ori && up >= obo && bo <= oup) {
             // collided
-            __android_log_print(ANDROID_LOG_INFO, "LOG", "RIGHT Collided with bottom!\n");
+            //__android_log_print(ANDROID_LOG_INFO, "LOG", "RIGHT Collided with bottom!\n");
             return true;
         }
     }
@@ -139,7 +139,7 @@ bool Player::checkCollision(Obstacle *obs) {
 
     if (ri >= ole && le <= ori && up >= obo && bo <= oup) {
         // collided
-        __android_log_print(ANDROID_LOG_INFO, "LOG", "BOTTOM Collided with top!\n");
+        //__android_log_print(ANDROID_LOG_INFO, "LOG", "BOTTOM Collided with top!\n");
         return true;
     }
     else {
@@ -153,7 +153,7 @@ bool Player::checkCollision(Obstacle *obs) {
 
         if (ri >= ole && le <= ori && up >= obo && bo <= oup) {
             // collided
-            __android_log_print(ANDROID_LOG_INFO, "LOG", "BOTTOM Collided with bottom!\n");
+            //__android_log_print(ANDROID_LOG_INFO, "LOG", "BOTTOM Collided with bottom!\n");
             return true;
         }
     }

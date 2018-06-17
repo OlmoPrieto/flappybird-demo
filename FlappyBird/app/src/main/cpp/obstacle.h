@@ -27,18 +27,12 @@ private:
 
     uint32_t m_id = 0;
 
-    bool m_available = true;
-
 public:
     Obstacle();
     ~Obstacle();
 
     Sprite* getUpperSprite();
     Sprite* getLowerSprite();
-
-    bool isAvailable() const;
-    void setUnavailable();
-    void setAvailable();
 
     Vec3 getPosition() const;
 
