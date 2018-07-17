@@ -67,8 +67,7 @@ private:
 
     bool m_can_move = false;
     bool m_game_over = false;
-
-    static Game* m_game;
+    bool m_game_created = false;
 
 public:
 

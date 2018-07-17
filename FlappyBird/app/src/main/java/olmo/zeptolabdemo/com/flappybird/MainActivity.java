@@ -15,11 +15,6 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Used to load the 'native-lib' library on application startup.
-//    static {
-//        System.loadLibrary("native-lib");
-//    }
-
     private GLSurfaceView glSurfaceView;
     private RendererWrapper rendererWrapper;
     private boolean rendererSet;
@@ -27,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -44,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
             glSurfaceView = new GLSurfaceView(this);
 
             glSurfaceView.setEGLContextClientVersion(2);
+            glSurfaceView.setPreserveEGLContextOnPause(true);
             rendererWrapper = new RendererWrapper();
             glSurfaceView.setRenderer(rendererWrapper);
 
@@ -90,12 +85,4 @@ public class MainActivity extends AppCompatActivity {
             glSurfaceView.onResume();
         }
     }
-
-
-
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
 }

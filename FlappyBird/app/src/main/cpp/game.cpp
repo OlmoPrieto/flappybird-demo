@@ -11,22 +11,18 @@
 
 #include "game.h"
 
-Game* Game::m_game = nullptr;
-
 Game::Game() {
     m_obstacle_index = m_max_obstacles - 1;
 }
 
 Game::~Game() {
-    delete m_game;
+
 }
 
 Game* Game::Instance() {
-    if (m_game == nullptr) {
-        m_game = new Game();
-    }
+    static Game game;
 
-    return m_game;
+    return &game;
 }
 
 static const char* vertex_shader_text =
@@ -116,70 +112,50 @@ void Game::setupOpenGL() {
     m_indices[5] = 1;
 
     glGenBuffers(1, &m_vertices_index);
-    //CheckGLError("glGenBuffers");
     glBindBuffer(GL_ARRAY_BUFFER, m_vertices_index);
-    //CheckGLError("glBindBuffer");
     glBufferData(GL_ARRAY_BUFFER, sizeof(m_vertices) + sizeof(m_uvs) + sizeof(m_indices), m_vertices, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, sizeof(m_vertices), sizeof(m_uvs), m_uvs);
     glBufferSubData(GL_ARRAY_BUFFER, sizeof(m_vertices) + sizeof(m_uvs), sizeof(m_indices), m_indices);
-    //CheckGLError("glBufferData");
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //CheckGLError("glBindBuffer(0)");
 
 
     GLuint  other_vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
-    //CheckGLError("glCreateShader vertex2");
 
 
     // Create and compile vertex shader
     GLuint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
-    //CheckGLError("glCreateShader vertex");
     glShaderSource(vertex_shader_id, 1, &vertex_shader_text, nullptr);
-    //CheckGLError("glShaderSource vertex");
     glCompileShader(vertex_shader_id);
-    //CheckGLError("glCompileShader vertex");
     GLint vertex_shader_compiling_success = 0;
     glGetShaderiv(vertex_shader_id, GL_COMPILE_STATUS, &vertex_shader_compiling_success);
-    //CheckGLError("glGetShaderiv vertex");
     if (!vertex_shader_compiling_success) {
-        //__android_log_print(ANDROID_LOG_INFO, "Shader info log", "Failed to compile vertex shader\n");
         GLint log_size = 0;
         glGetShaderiv(vertex_shader_id, GL_INFO_LOG_LENGTH, &log_size);
         char* log = (char*)malloc(log_size);
         GLint read = 0;
         glGetShaderInfoLog(vertex_shader_id, log_size, &read, log);
-        //__android_log_print(ANDROID_LOG_INFO, "Shader info log", "Error: %s\n", log);
         free(log);
     }
 
     // Create and compile fragment shader
     GLuint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
-    //CheckGLError("glCreateShader fragment");
     glShaderSource(fragment_shader_id, 1, &fragment_shader_text, nullptr);
-    //CheckGLError("glShaderSource fragment");
     glCompileShader(fragment_shader_id);
-    //CheckGLError("glCompileShader fragment");
     GLint fragment_shader_compiling_success = 0;
     glGetShaderiv(fragment_shader_id, GL_COMPILE_STATUS, &fragment_shader_compiling_success);
     if (!fragment_shader_compiling_success) {
-        //__android_log_print(ANDROID_LOG_INFO, "Shader info log", "Failed to compile fragment shader\n");
         GLint log_size = 0;
         glGetShaderiv(fragment_shader_id, GL_INFO_LOG_LENGTH, &log_size);
         char* log = (char*)malloc(log_size);
         GLint read = 0;
         glGetShaderInfoLog(fragment_shader_id, log_size, &read, log);
-        //__android_log_print(ANDROID_LOG_INFO, "Shader info log", "Error: %s\n", log);
         free(log);
     }
 
     GLuint program_id = glCreateProgram();
-    //CheckGLError("glCreateProgram");
     glAttachShader(program_id, vertex_shader_id);
-    //CheckGLError("glAttachShader vertex");
     glAttachShader(program_id, fragment_shader_id);
-    //CheckGLError("glAttachShader fragment");
     glLinkProgram(program_id);
-    //CheckGLError("glLinkProgram");
 
     m_mvp_location = glGetUniformLocation(program_id, "MVP");
     m_color_location = glGetUniformLocation(program_id, "color");
@@ -187,17 +163,12 @@ void Game::setupOpenGL() {
     glBindBuffer(GL_ARRAY_BUFFER, m_vertices_index);
     m_position_location = glGetAttribLocation(program_id, "position");
     glEnableVertexAttribArray(m_position_location);
-    //CheckGLError("glEnableVertexAttribArray position");
     glVertexAttribPointer(m_position_location, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-    //CheckGLError("glVertexAttribPointer position");
 
     m_uvs_location = glGetAttribLocation(program_id, "uv");
     glEnableVertexAttribArray(m_uvs_location);
-    //CheckGLError("glEnableVertexAttribArray uvs");
 
-    //glBindBuffer(GL_ARRAY_BUFFER, m_vertices_index);
     glVertexAttribPointer(m_uvs_location, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)sizeof(m_vertices));
-    //CheckGLError("glVertexAttribPointer uvs");
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
@@ -233,26 +204,30 @@ void Game::setupOpenGL() {
     m_projection.matrix[14] = 0.0f;
     m_projection.matrix[15] = 1.0f;
 
-    //glClearColor((float)108 / 255, (float)211 / 255, (float)255 / 255, 0.0f);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     glUseProgram(program_id);
-    //CheckGLError("glUseProgram");
     glUniformMatrix4fv(m_mvp_location, 1, GL_FALSE, (const GLfloat*)m_projection.matrix);
-    //CheckGLError("glUniformMatrix4fv");
 }
 
 void Game::onSurfaceCreated() {
-    // ALWAYS FIRST
-    setupOpenGL();
-
     srand(std::chrono::duration_cast<std::chrono::duration<int32_t > >(m_clock.now().time_since_epoch()).count());
 
-    m_obstacles.reserve(m_max_obstacles);
-    for (uint32_t i = 0; i < m_max_obstacles; ++i) {
-        m_obstacles.emplace_back();
+    if (m_game_created == false) {
+        __android_log_print(ANDROID_LOG_DEBUG, "LOG", "WTF 23\n");
+
+        // ALWAYS FIRST
+        setupOpenGL();
+
+        m_obstacles.reserve(m_max_obstacles);
+        for (uint32_t i = 0; i < m_max_obstacles; ++i) {
+            m_obstacles.emplace_back();
+        }
+
+        m_game_created = true;
+
+        resetGame();
     }
-    resetGame();
 }
 
 void Game::resetGame() {
@@ -291,12 +266,10 @@ void Game::drawSprite(Sprite* sprite) {
     Color c = sprite->getColor();
     glUniform4f(m_color_location, (float)c.r / (float)255, (float)c.g / (float)255,
                 (float)c.b / (float)255, (float)c.a / (float)255);
-    //CheckGLError("glUniform4f");
 
     glBindTexture(GL_TEXTURE_2D, sprite->getTextureHandler());
 
     glBindBuffer(GL_ARRAY_BUFFER, m_vertices_index);
-    //CheckGLError("glBindBuffer");
 
     Vec3 scale = sprite->getScale();
     Vec3 pos = sprite->getPosition();
@@ -307,12 +280,9 @@ void Game::drawSprite(Sprite* sprite) {
             { m_vertices[3].x * scale.x + pos.x, m_vertices[3].y * scale.y + pos.y, m_vertices[3].z * scale.z + pos.z },
     };
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), &vertices);
-    //CheckGLError("glBufferSubData");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indices_index);
-    //CheckGLError("glBindBuffer GL_ELEMENT_ARRAY_BUFFER");
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, m_indices);
-    //CheckGLError("glDrawElements");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -350,8 +320,6 @@ void Game::onDrawFrame() {
         m_events.pop();
     }
 
-    //__android_log_print(ANDROID_LOG_INFO, "LOG", "frame_time: %.2f\n", m_prev_time);
-
     // Update the obstacles
     for (uint32_t i = 0; i < m_max_obstacles; ++i) {
         m_obstacles[i].update(m_prev_time);
@@ -367,7 +335,6 @@ void Game::onDrawFrame() {
 
         Vec3 pos = m_obstacles[i].getPosition();
         if (pos.x < -1.5f) {
-            //__android_log_print(ANDROID_LOG_INFO, "LOG", "%u\n", m_obstacle_index % m_max_obstacles);
             // set that obstacle behind the last one
             pos.x = m_obstacles[m_obstacle_index++ % m_max_obstacles].getPosition().x + m_gap_between_obstacles;
 
