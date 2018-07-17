@@ -5,11 +5,12 @@
 #include <android/log.h>
 
 #include "obstacle.h"
+#include "game.h"
 
 std::mt19937 Obstacle::m_random_generator;
 
 float Obstacle::m_speed = 0.001f;
-float Obstacle::m_gap   = 0.1372f;
+float Obstacle::m_gap   = 225.0f;
 uint32_t Obstacle::m_global_id = 0;
 bool Obstacle::m_random_generator_seeded = false;
 bool Obstacle::m_can_move = false;
@@ -23,8 +24,8 @@ Obstacle::Obstacle() {
         m_random_generator_seeded = true;
     }
 
-    m_upper.setScale(0.175f, 1.0f - m_gap, 1.0f);
-    m_lower.setScale(0.175f, 1.0f - m_gap, 1.0f);
+    m_upper.setScale(150.0f, 1000.0f - m_gap, 1.0f);
+    m_lower.setScale(150.0f, 1000.0f - m_gap, 1.0f);
 
     randomizeHeight();
 
@@ -126,7 +127,7 @@ void Obstacle::randomizeHeight() {
     for (uint8_t i = 0; i < 64; ++i) {
         random = (uint32_t)m_random_generator() % 40;
     }
-    //__android_log_print(ANDROID_LOG_INFO, "LOG", "random: %u\n", random);
+
     random += 10;
     float height = (float)random / 100.0f;
 
@@ -134,8 +135,10 @@ void Obstacle::randomizeHeight() {
         height = -height;   // multiplying by -1.0f is another operation, so don't do it
     }
 
-    m_upper.setPositionY(0.0f + m_gap + 1.0f + height);
-    m_lower.setPositionY(0.0f - m_gap - 1.0f + height);
+    m_upper.setPositionY(+m_gap + 1.0f + height);
+    m_lower.setPositionY(-m_gap - 1.0f + height);
+    m_upper.setPositionY(Game::m_render_height);
+    m_lower.setPositionY(-((float)(Game::m_render_height)) * 0.5f);
 }
 
 void Obstacle::stop() {

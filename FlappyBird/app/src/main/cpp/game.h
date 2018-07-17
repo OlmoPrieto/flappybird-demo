@@ -71,6 +71,10 @@ private:
 
 public:
 
+    static uint32_t m_render_width;
+    static uint32_t m_render_height;
+    static uint32_t m_render_desired_width;
+    static uint32_t m_render_desired_height;
     static Game* Instance();
 
     ~Game();
