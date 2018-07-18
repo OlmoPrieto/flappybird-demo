@@ -188,7 +188,7 @@ void Game::setupOpenGL() {
     float aspect_ratio = 1.0f;
     if (m_render_width > m_render_height) {
         aspect_ratio = m_render_width / m_render_height;
-        right  = m_render_width * aspect_ratio;
+        right  = m_render_width;
         left   = 0.0f;
         top    = m_render_height;
         bottom = 0.0f;
@@ -197,7 +197,7 @@ void Game::setupOpenGL() {
         aspect_ratio = m_render_height / m_render_width;
         right  = m_render_width;
         left   = 0.0f;
-        top    = m_render_height / aspect_ratio;
+        top    = m_render_height;
         bottom = 0.0f;
     }
 
@@ -269,6 +269,7 @@ void Game::resetGame() {
 
     m_player.setPosition(m_render_width * 0.5f, m_render_height * 0.5f, 0.0f);
     m_player.stop();
+    m_player.setCollideState(true);
 
     m_time1 = m_clock.now();
     m_time2 = m_clock.now();
@@ -352,14 +353,20 @@ void Game::onDrawFrame() {
         if (m_player.checkCollision(&m_obstacles[i])) {
             m_game_over = true;
             m_can_move = false;
-            //m_player.stop();  // don't stop player so it falls
+
+            // comment this two lines below to let the player end his movement before falling
+//            m_player.setCollideState(false);
+//            m_player.setYVelocity(0.0f);
+            m_player.stop();
+
+            // stop all obstacles
             Obstacle::stop();
 
             break;
         }
 
         Vec3 pos = m_obstacles[i].getPosition();
-        if (pos.x < -((float)(m_render_width)) * 1.25f) {
+        if (pos.x < -((float)(m_render_width)) * 1.25f) {   // the obstacle is 25% off the screen on the left
             // set that obstacle behind the last one
             pos.x = m_obstacles[m_obstacle_index++ % m_max_obstacles].getPosition().x + m_gap_between_obstacles;
 
@@ -371,7 +378,6 @@ void Game::onDrawFrame() {
     }
 
     // Update the player
-    m_player.update(m_prev_time);
     if (m_player.isTouchingGround()) {
         m_game_over = true;
         m_can_move = false;
@@ -384,6 +390,8 @@ void Game::onDrawFrame() {
         m_can_move = false;
         Obstacle::stop();
     }
+
+    m_player.update(m_prev_time);
 
 
     // Actual draw

@@ -24,12 +24,12 @@ Obstacle::Obstacle() {
         m_random_generator_seeded = true;
     }
 
-    float w = (float)(Game::m_render_width) * 0.08f * Game::m_render_width / Game::m_render_desired_width;
-    float h = (float)(Game::m_render_height) * 0.5f * Game::m_render_height / Game::m_render_desired_height - m_gap;
+//    float w = (float)(Game::m_render_width) * 0.08f * Game::m_render_width / Game::m_render_desired_width;
+//    float h = (float)(Game::m_render_height) * 0.5f * Game::m_render_height / Game::m_render_desired_height - m_gap;
+    float w = (float)(Game::m_render_width) * 0.08f;
+    float h = (float)(Game::m_render_height) * 0.5f - m_gap;
     m_upper.setScale(w, h, 1.0f);
     m_lower.setScale(w, h, 1.0f);
-
-    randomizeHeight();
 
     Color color(Color::randomColor());
 
