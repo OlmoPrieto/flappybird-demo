@@ -185,24 +185,24 @@ void Game::setupOpenGL() {
     float top    =  1.0f;
     float bottom = -1.0f;
 
-    float aspect_ratio = m_render_width / m_render_height;
+    float aspect_ratio = 1.0f;
     if (m_render_width > m_render_height) {
         aspect_ratio = m_render_width / m_render_height;
         right  = m_render_width * aspect_ratio;
-        left   = -right;
+        left   = 0.0f;
         top    = m_render_height;
-        bottom = -top;
+        bottom = 0.0f;
     }
     else {
         aspect_ratio = m_render_height / m_render_width;
         right  = m_render_width;
-        left   = -right;
+        left   = 0.0f;
         top    = m_render_height / aspect_ratio;
-        bottom = -top;
+        bottom = 0.0f;
     }
 
-    float near = 0.1f;
-    float far  = 1000.0f;
+    float near = -1.0f;
+    float far  = 1.0f;
     float fov  = 60.0f;
 
     m_projection.matrix[0] = 2.0f / (right - left);
@@ -222,7 +222,7 @@ void Game::setupOpenGL() {
 
     m_projection.matrix[12] = -(right + left) / (right - left);
     m_projection.matrix[13] = -(top + bottom) / (top - bottom);
-    m_projection.matrix[14] = 0.0f;//-(far + near  ) / (far - near  );
+    m_projection.matrix[14] = -(far + near  ) / (far - near  );
     m_projection.matrix[15] = 1.0f;
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -235,10 +235,10 @@ void Game::onSurfaceCreated() {
     srand(std::chrono::duration_cast<std::chrono::duration<int32_t > >(m_clock.now().time_since_epoch()).count());
 
     if (m_game_created == false) {
-        __android_log_print(ANDROID_LOG_DEBUG, "LOG", "WTF 23\n");
-
         // ALWAYS FIRST
         setupOpenGL();
+
+        m_gap_between_obstacles = (float)(m_render_width) * 0.75f;
 
         m_obstacles.reserve(m_max_obstacles);
         for (uint32_t i = 0; i < m_max_obstacles; ++i) {
@@ -252,18 +252,22 @@ void Game::onSurfaceCreated() {
 }
 
 void Game::resetGame() {
-    Vec3 pos(m_gap_between_obstacles, 0.0f, 0.0f);
     for (uint32_t i = 0; i < m_max_obstacles; ++i) {
-        m_obstacles[i].setPosition(pos.x * (i + 1), pos.y, pos.z);
-        m_obstacles[i].setSpritesXPositions(pos.x * (i + 1));
+        m_obstacles[i].setPosition((float)(m_render_width) * 0.5f + m_gap_between_obstacles * (i + 1), 0.0f, 0.0f);
+        m_obstacles[i].setSpritesXPositions((float)(m_render_width) * 0.5f + m_gap_between_obstacles * (i + 1));
 
         m_obstacles[i].randomizeSpritesTint();
-        m_obstacles[i].randomizeHeight();
+        if (i != 0) {
+            m_obstacles[i].randomizeHeight();
+        }
+        else {
+            m_obstacles[i].setHeight(0.0f);
+        }
 
         m_obstacles[i].stop();
     }
 
-    m_player.setPosition(0.0f, 0.0f, 0.0f);
+    m_player.setPosition(m_render_width * 0.5f, m_render_height * 0.5f, 0.0f);
     m_player.stop();
 
     m_time1 = m_clock.now();
@@ -355,7 +359,7 @@ void Game::onDrawFrame() {
         }
 
         Vec3 pos = m_obstacles[i].getPosition();
-        if (pos.x < -1.5f) {
+        if (pos.x < -((float)(m_render_width)) * 1.25f) {
             // set that obstacle behind the last one
             pos.x = m_obstacles[m_obstacle_index++ % m_max_obstacles].getPosition().x + m_gap_between_obstacles;
 

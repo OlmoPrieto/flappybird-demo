@@ -10,8 +10,10 @@ extern "C" {
 #endif
 
 JNIEXPORT void JNICALL Java_olmo_zeptolabdemo_com_flappybird_GameLibJNIWrapper_onSurfaceCreated
-        (JNIEnv *env, jclass clss) {
+        (JNIEnv *env, jclass clss, jint width, jint height) {
 
+    Game::m_render_width = width;
+    Game::m_render_height = height;
     Game::Instance()->onSurfaceCreated();
 }
 

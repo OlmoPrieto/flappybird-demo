@@ -15,11 +15,11 @@ private:
     Vec3 m_velocity;
     float m_y_velocity = 0.0f;
     float m_y_force = 0.0f;
-    float m_impulse_amount = 0.0019f;
-    float m_gravity = -0.0000015f;
-    float m_speed = -0.00008f;
-    float m_floor_limit = -0.92f;
-    float m_ceil_limit = 0.92f;
+    float m_impulse_amount = 2.05f;
+    float m_gravity = -0.005f;
+    float m_speed = -0.05f;
+    float m_floor_limit = 0.0f;
+    float m_ceil_limit = 0.0f;
 
     bool m_can_move = false;
 

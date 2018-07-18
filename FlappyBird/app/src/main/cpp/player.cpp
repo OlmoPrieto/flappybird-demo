@@ -5,9 +5,20 @@
 #include <android/log.h>
 
 #include "player.h"
+#include "game.h"
 
 Player::Player() {
-    m_sprite.setScale(0.135f, 0.081f, 1.0f);
+    float scale = 0.0f;
+    if (Game::m_render_width > Game::m_render_height) {
+        scale = 80.0f * Game::m_render_width / Game::m_render_desired_width;
+    }
+    else {
+        scale = 80.0f * Game::m_render_height / Game::m_render_desired_height;
+    }
+    m_sprite.setScale(scale, scale, 1.0f);
+
+    m_floor_limit = 0.0f + scale;
+    m_ceil_limit = (float)(Game::m_render_height) - scale;
 
     uint8_t* texture_data = m_sprite.getTextureData();
     CreateCircleInTexture(texture_data, m_sprite.getTextureWidth(),

@@ -63,7 +63,7 @@ private:
     uint32_t m_obstacle_index = 0;
 
     float m_prev_time = 0.0f;
-    float m_gap_between_obstacles = 1.35f;
+    float m_gap_between_obstacles = 0.0f;
 
     bool m_can_move = false;
     bool m_game_over = false;

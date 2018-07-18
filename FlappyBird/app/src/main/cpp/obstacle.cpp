@@ -9,8 +9,8 @@
 
 std::mt19937 Obstacle::m_random_generator;
 
-float Obstacle::m_speed = 0.001f;
-float Obstacle::m_gap   = 225.0f;
+float Obstacle::m_speed = 0.7f;
+float Obstacle::m_gap   = Game::m_render_height * 0.15;
 uint32_t Obstacle::m_global_id = 0;
 bool Obstacle::m_random_generator_seeded = false;
 bool Obstacle::m_can_move = false;
@@ -24,8 +24,10 @@ Obstacle::Obstacle() {
         m_random_generator_seeded = true;
     }
 
-    m_upper.setScale(150.0f, 1000.0f - m_gap, 1.0f);
-    m_lower.setScale(150.0f, 1000.0f - m_gap, 1.0f);
+    float w = (float)(Game::m_render_width) * 0.08f * Game::m_render_width / Game::m_render_desired_width;
+    float h = (float)(Game::m_render_height) * 0.5f * Game::m_render_height / Game::m_render_desired_height - m_gap;
+    m_upper.setScale(w, h, 1.0f);
+    m_lower.setScale(w, h, 1.0f);
 
     randomizeHeight();
 
@@ -91,8 +93,6 @@ void Obstacle::setPosition(float x, float y, float z) {
     m_position.x = x;
     m_position.y = y;
     m_position.z = z;
-
-    //setSpritesPositions();
 }
 
 uint32_t Obstacle::getID() const {
@@ -121,24 +121,24 @@ void Obstacle::randomizeSpritesTint() {
 }
 
 void Obstacle::randomizeHeight() {
-    uint32_t random = 0;
+    float random = 0;
     // if it only generates once, the distribution isn't that good
     // and repeated or similar values appear
     for (uint8_t i = 0; i < 64; ++i) {
-        random = (uint32_t)m_random_generator() % 40;
+        random = (float)((uint32_t)m_random_generator() % (uint32_t)((float)(Game::m_render_height) * 0.25f));
     }
-
-    random += 10;
-    float height = (float)random / 100.0f;
 
     if ((uint32_t)m_random_generator() % 100 >= 50) {  // decide if up or down
-        height = -height;   // multiplying by -1.0f is another operation, so don't do it
+        random = -random;   // multiplying by -1.0f is another operation, so don't do it
     }
 
-    m_upper.setPositionY(+m_gap + 1.0f + height);
-    m_lower.setPositionY(-m_gap - 1.0f + height);
-    m_upper.setPositionY(Game::m_render_height);
-    m_lower.setPositionY(-((float)(Game::m_render_height)) * 0.5f);
+    m_upper.setPositionY((float)(Game::m_render_height) + random);
+    m_lower.setPositionY(0.0f + random);
+}
+
+void Obstacle::setHeight(float height) {
+    m_upper.setPositionY((float)(Game::m_render_height) + height);
+    m_lower.setPositionY(0.0f + height);
 }
 
 void Obstacle::stop() {

@@ -8,9 +8,17 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class RendererWrapper implements Renderer {
 
+    private int width = 0;
+    private int height = 0;
+
+    RendererWrapper(int width, int height) {
+        this.width = width;
+        this.height = height;
+    }
+
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        GameLibJNIWrapper.onSurfaceCreated();
+        GameLibJNIWrapper.onSurfaceCreated(width, height);
     }
 
     @Override

@@ -46,6 +46,7 @@ public:
     void moveSpritesBy(const Vec3& offset);
     void randomizeSpritesTint();
     void randomizeHeight();
+    void setHeight(float height);
 
     static void stop();
     static void start();
