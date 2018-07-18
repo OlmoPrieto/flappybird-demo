@@ -5,7 +5,7 @@ android {
         release1 {
             keyAlias 'key0'
             keyPassword 'olmoprieto14*'
-            //storeFile file('C:/Users/Olmo/.android/keystores/android.jks')
+            storeFile file('C:/Users/Olmo/.android/keystores/android.jks')
             storePassword 'olmoprieto14*'
         }
     }

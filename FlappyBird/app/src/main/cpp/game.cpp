@@ -346,8 +346,12 @@ void Game::onDrawFrame() {
         m_events.pop();
     }
 
+    Vec3 pos = m_player.getPosition();
+    m_player.update(m_prev_time);
+
     // Update the obstacles
     for (uint32_t i = 0; i < m_max_obstacles; ++i) {
+        Vec3 o = m_obstacles[i].getPosition();
         m_obstacles[i].update(m_prev_time);
 
         if (m_player.checkCollision(&m_obstacles[i])) {
@@ -358,6 +362,8 @@ void Game::onDrawFrame() {
 //            m_player.setCollideState(false);
 //            m_player.setYVelocity(0.0f);
             m_player.stop();
+            //m_player.setPosition(pos);
+            //m_obstacles[i].setPosition(o);
 
             // stop all obstacles
             Obstacle::stop();
@@ -378,6 +384,7 @@ void Game::onDrawFrame() {
     }
 
     // Update the player
+
     if (m_player.isTouchingGround()) {
         m_game_over = true;
         m_can_move = false;
@@ -390,8 +397,6 @@ void Game::onDrawFrame() {
         m_can_move = false;
         Obstacle::stop();
     }
-
-    m_player.update(m_prev_time);
 
 
     // Actual draw

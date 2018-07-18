@@ -177,40 +177,95 @@ void Player::setCollideState(bool state) {
 //    return false;
 //}
 
+//bool Player::checkCollision(Obstacle *obs) {
+//    float x_side = 0.0f;
+//    float y_side = 0.0f;
+//    float dx = 0.0f;
+//    float dy = 0.0f;
+//    Vec3 other_pos;
+//    Vec3 other_scale;
+//    Vec3 pos = m_sprite.getPosition();
+//    Vec3 scale = m_sprite.getScale();
+//
+//    float s_radius = scale.x * scale.x; // its the same in x and y
+//
+//    // check against every side
+//
+//    //  bottom side
+//    other_pos = obs->getUpperSprite()->getPosition();
+//    other_scale = obs->getUpperSprite()->getScale();
+//
+//    x_side = other_pos.x;
+//    y_side = other_pos.y - other_scale.y;
+//
+//    dx = pos.x - x_side;
+//    dy = pos.y - y_side;
+//
+//    dx *= dx;
+//    dy *= dy;
+//    if (dx + dy <= s_radius) {
+//        return true;
+//    }
+//
+//
+//    return false;
+//}
+
 bool Player::checkCollision(Obstacle *obs) {
-    float x_side = 0.0f;
-    float y_side = 0.0f;
-    float dx = 0.0f;
-    float dy = 0.0f;
-    Vec3 other_pos;
-    Vec3 other_scale;
+    bool result = false;
+
     Vec3 pos = m_sprite.getPosition();
     Vec3 scale = m_sprite.getScale();
 
-    float s_radius = scale.x * scale.x; // its the same in x and y
+    // Check upper obstacle
+    Vec3 other_pos = obs->getUpperSprite()->getPosition();
+    Vec3 other_scale = obs->getUpperSprite()->getScale();
 
-    // check against every side
+    float d_x = fabs(pos.x - other_pos.x);
+    float d_y = fabs(pos.y - other_pos.y);
 
-    //  upper side
-    other_pos = obs->getUpperSprite()->getPosition();
-    other_scale = obs->getUpperSprite()->getScale();
+    if (d_x > (other_scale.x + scale.x) || d_y > (other_scale.y + scale.y)) {
+        //return false;
+    }
 
-    x_side = other_pos.x - other_scale.y;
-    y_side = other_pos.y - other_scale.y;
+    if (d_x <= other_scale.x || d_y <= other_scale.y) {
+        __android_log_print(ANDROID_LOG_DEBUG, "LOG", "FUCK MORTY\n");
+        //return true;
+        result = true;
+    }
 
-    dx = pos.x - x_side;
-    dy = pos.y - y_side;
+    float corner_d_sq = (d_x - other_scale.x) * (d_x - other_scale.x) +
+                        (d_y - other_scale.y) * (d_y - other_scale.y);
 
-    dx *= dx;
-    dy *= dy;
-    if (dx + dy <= s_radius) {
-        __android_log_print(ANDROID_LOG_INFO, "LOG", "s_radius: %.2f  dx: %.2f  dy: %.2f\n", s_radius, dx, dy);
+    if (corner_d_sq <= scale.x * scale.x) {
         return true;
     }
 
+    // Check lower obstacle
+    other_pos = obs->getLowerSprite()->getPosition();
+    other_scale = obs->getLowerSprite()->getScale();
+    d_x = fabs(pos.x - other_pos.x);
+    d_y = fabs(pos.y - other_pos.y);
 
+    if (d_x > (other_scale.x + scale.x) || d_y > (other_scale.y + scale.y)) {
+        //return false;
+        result = false;
+    }
 
-    return false;
+    if (d_x <= other_scale.x || d_y <= other_scale.y) {
+        __android_log_print(ANDROID_LOG_DEBUG, "LOG", "GEEZ RICK\n");
+        //return true;
+        result = true;
+    }
+
+    corner_d_sq = (d_x - other_scale.x) * (d_x - other_scale.x) +
+                  (d_y - other_scale.y) * (d_y - other_scale.y);
+
+    if (corner_d_sq <= scale.x * scale.x) {
+        return true;
+    }
+
+    return result;
 }
 
 bool Player::isTouchingGround() {
