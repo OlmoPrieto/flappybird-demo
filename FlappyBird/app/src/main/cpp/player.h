@@ -10,9 +10,14 @@
 
 class Player {
 private:
+    void move(const Vec3& origin_position, float dt);
+    bool checkCollisionWithObstaclePart(const Vec3& obstacle_pos, const Vec3& obstacle_scale);
+
     Sprite m_sprite;
+    Vec3 m_prev_pos;
 
     float m_y_velocity = 0.0f;
+    float m_prev_y_velocity = 0.0f;
     float m_y_force = 0.0f;
     float m_impulse_amount = 2.075f;
     float m_gravity = -0.0055f;
@@ -37,6 +42,7 @@ public:
     void addForce();
 
     void setCollideState(bool state);
+    void placeAtCollisionPoint(Obstacle* obstacle);
     bool checkCollision(Obstacle* obs);
     bool isTouchingGround();
     bool isTouchingCeiling();

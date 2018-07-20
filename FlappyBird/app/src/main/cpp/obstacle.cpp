@@ -9,8 +9,8 @@
 
 std::mt19937 Obstacle::m_random_generator;
 
-float Obstacle::m_speed = 0.7f;
-float Obstacle::m_gap   = Game::m_render_height * 0.15;
+float Obstacle::m_speed = 0.6f;
+float Obstacle::m_gap   = Game::m_render_height * 0.13;
 uint32_t Obstacle::m_global_id = 0;
 bool Obstacle::m_random_generator_seeded = false;
 bool Obstacle::m_can_move = false;

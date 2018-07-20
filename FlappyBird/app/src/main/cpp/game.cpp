@@ -284,6 +284,10 @@ void Game::onSurfaceChanged(int width, int height) {
     // Do nothing
 }
 
+float Game::getLastFrameDT() const {
+    return m_last_frame_dt;
+}
+
 void Game::registerEvent(float x, float y) {
     m_events.emplace(x, y );
 }
@@ -358,12 +362,12 @@ void Game::onDrawFrame() {
             m_game_over = true;
             m_can_move = false;
 
-            // comment this two lines below to let the player end his movement before falling
-//            m_player.setCollideState(false);
-//            m_player.setYVelocity(0.0f);
-            m_player.stop();
-            //m_player.setPosition(pos);
-            //m_obstacles[i].setPosition(o);
+            // Set player's position to be at the (almost) exact pixel where it
+            // collided with the obstacle. It's not really visible because of
+            // the motion of the player (because like in flappy bird, when
+            // colliding with an obstacle the player keeps its momentum).
+            m_player.placeAtCollisionPoint(&m_obstacles[i]);
+            m_player.setCollideState(false);
 
             // stop all obstacles
             Obstacle::stop();
@@ -427,4 +431,6 @@ void Game::onDrawFrame() {
         m_time2 = m_clock.now();
         m_prev_time += std::chrono::duration_cast<std::chrono::duration<float> >(m_time2 - m_time1).count();
     }
+
+    m_last_frame_dt = m_prev_time;
 }

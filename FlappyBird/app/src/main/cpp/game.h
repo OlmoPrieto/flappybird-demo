@@ -64,6 +64,7 @@ private:
 
     float m_prev_time = 0.0f;
     float m_gap_between_obstacles = 0.0f;
+    float m_last_frame_dt = 0.0f;
 
     bool m_can_move = false;
     bool m_game_over = false;
@@ -83,6 +84,8 @@ public:
     void onSurfaceChanged(int width, int height);
     void onDrawFrame();
     void registerEvent(float x, float y);
+
+    float getLastFrameDT() const;
 };
 
 #endif //FLAPPYBIRD_GAME_H
