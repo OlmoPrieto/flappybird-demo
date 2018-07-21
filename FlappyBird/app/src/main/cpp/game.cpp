@@ -234,21 +234,19 @@ void Game::setupOpenGL() {
 void Game::onSurfaceCreated() {
     srand(std::chrono::duration_cast<std::chrono::duration<int32_t > >(m_clock.now().time_since_epoch()).count());
 
-    if (m_game_created == false) {
-        // ALWAYS FIRST
-        setupOpenGL();
+    // ALWAYS FIRST
+    setupOpenGL();
 
-        m_gap_between_obstacles = (float)(m_render_width) * 0.75f;
+    m_gap_between_obstacles = (float)(m_render_width) * 0.75f;
 
-        m_obstacles.reserve(m_max_obstacles);
-        for (uint32_t i = 0; i < m_max_obstacles; ++i) {
-            m_obstacles.emplace_back();
-        }
-
-        m_game_created = true;
-
-        resetGame();
+    m_obstacles.reserve(m_max_obstacles);
+    for (uint32_t i = 0; i < m_max_obstacles; ++i) {
+        m_obstacles.emplace_back();
     }
+
+    resetGame();
+
+    m_game_created = true;
 }
 
 void Game::resetGame() {

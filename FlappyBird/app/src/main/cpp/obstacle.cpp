@@ -9,8 +9,9 @@
 
 std::mt19937 Obstacle::m_random_generator;
 
-float Obstacle::m_speed = 0.6f;
-float Obstacle::m_gap   = Game::m_render_height * 0.13;
+//float Obstacle::m_speed = 0.6f;
+float Obstacle::m_speed = Game::m_render_width * 0.0005f;
+float Obstacle::m_gap   = Game::m_render_height * 0.13f;
 uint32_t Obstacle::m_global_id = 0;
 bool Obstacle::m_random_generator_seeded = false;
 bool Obstacle::m_can_move = false;
@@ -24,8 +25,6 @@ Obstacle::Obstacle() {
         m_random_generator_seeded = true;
     }
 
-//    float w = (float)(Game::m_render_width) * 0.08f * Game::m_render_width / Game::m_render_desired_width;
-//    float h = (float)(Game::m_render_height) * 0.5f * Game::m_render_height / Game::m_render_desired_height - m_gap;
     float w = (float)(Game::m_render_width) * 0.08f;
     float h = (float)(Game::m_render_height) * 0.5f - m_gap;
     m_upper.setScale(w, h, 1.0f);

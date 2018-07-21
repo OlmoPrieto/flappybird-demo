@@ -2,6 +2,7 @@ package olmo.zeptolabdemo.com.flappybird;
 
 import android.opengl.GLSurfaceView.Renderer;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;

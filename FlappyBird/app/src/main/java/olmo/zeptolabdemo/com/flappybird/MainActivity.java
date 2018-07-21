@@ -7,6 +7,7 @@ import android.content.pm.ConfigurationInfo;
 import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Window;
@@ -87,5 +88,14 @@ public class MainActivity extends AppCompatActivity {
         if (rendererSet == true) {
             glSurfaceView.onResume();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (rendererSet == true) {
+            glSurfaceView.onPause();
+        }
+
+        moveTaskToBack(true);
     }
 }
